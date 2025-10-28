@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Marking Tracker</title>
+  <style>
+    html, body, iframe {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <iframe id="docFrame"></iframe>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get('name') || 'unknown';
+    const docUrl = params.get('doc');
+    if (!docUrl) {
+      document.body.innerHTML = '<h3>Missing ?doc= param</h3>';
+      throw new Error('Missing doc param');
+    }
+
+    const start = Date.now();
+    const webhook = 'https://n8n.example.com/webhook/marking-log';
+    let lastActive = Date.now();
+
+    // Load doc
+    const iframe = document.getElementById('docFrame');
+    iframe.src = docUrl;
+
+    // Track activity
+    const updateActivity = () => { lastActive = Date.now(); };
+    ['mousemove', 'keydown', 'click', 'scroll'].forEach(evt =>
+      window.addEventListener(evt, updateActivity)
+    );
+
+    // Check inactivity (5 minutes)
+    setInterval(() => {
+      if (Date.now() - lastActive > 5 * 60 * 1000) {
+        sendLog('inactive');
+        lastActive = Date.now(); // reset timer
+      }
+    }, 60 * 1000);
+
+    // Send log when closing tab
+    window.addEventListener('beforeunload', () => {
+      sendLog('closed');
+    });
+
+    function sendLog(reason) {
+      const duration = Math.round((Date.now() - start) / 1000);
+      navigator.sendBeacon(
+        webhook,
+        JSON.stringify({
+          name,
+          docUrl,
+          duration,
+          reason,
+          timestamp: new Date().toISOString()
+        })
+      );
+    }
+  </script>
+</body>
+</html>

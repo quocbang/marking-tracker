@@ -1,70 +1,128 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Marking Tracker</title>
-  <style>
-    html, body, iframe {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-  </style>
+  <title>Tracking</title>
+  <style>html,body,iframe{margin:0;padding:0;width:100%;height:100%} iframe{border:none}</style>
 </head>
 <body>
   <iframe id="docFrame"></iframe>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const name = params.get('name') || 'unknown';
-    const docUrl = params.get('doc');
-    if (!docUrl) {
-      document.body.innerHTML = '<h3>Missing ?doc= param</h3>';
-      throw new Error('Missing doc param');
+<script>
+(async function(){
+  const params = new URLSearchParams(window.location.search);
+  const name = params.get('name') || 'unknown';
+  const docUrl = params.get('doc');
+  if(!docUrl) { document.body.innerHTML = '<h3>Missing ?doc= param</h3>'; return; }
+
+  const BACKEND = 'https://https://n8n-mac.quocbangdev.asia/webhook/marking-log'; // thay bằng server của bạn
+  const START_URL = BACKEND + '/start';
+  const HB_URL = BACKEND + '/heartbeat';
+  const END_URL = BACKEND + '/end';
+
+  const iframe = document.getElementById('docFrame');
+  iframe.src = docUrl;
+
+  // localStorage key
+  const LS_KEY = 'grading_session_v1';
+
+  // try to reuse session from localStorage
+  let session = null;
+  try { session = JSON.parse(localStorage.getItem(LS_KEY)); } catch(e){ session = null; }
+
+  // helper: call backend
+  async function postJson(url, body) {
+    try {
+      const res = await fetch(url, {
+        method:'POST',
+        headers:{ 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        credentials: 'omit',
+      });
+      return res.ok ? await res.json().catch(()=>null) : null;
+    } catch(e){
+      console.warn('post error', e);
+      return null;
     }
+  }
 
-    const start = Date.now();
-    const webhook = 'https://n8n-mac.quocbangdev.asia/webhook/marking-log';
-    let lastActive = Date.now();
-
-    // Load doc
-    const iframe = document.getElementById('docFrame');
-    iframe.src = docUrl;
-
-    // Track activity
-    const updateActivity = () => { lastActive = Date.now(); };
-    ['mousemove', 'keydown', 'click', 'scroll'].forEach(evt =>
-      window.addEventListener(evt, updateActivity)
-    );
-
-    // Check inactivity (5 minutes)
-    setInterval(() => {
-      if (Date.now() - lastActive > 5 * 60 * 1000) {
-        sendLog('inactive');
-        lastActive = Date.now(); // reset timer
-      }
-    }, 60 * 1000);
-
-    // Send log when closing tab
-    window.addEventListener('beforeunload', () => {
-      sendLog('closed');
-    });
-
-    function sendLog(reason) {
-      const duration = Math.round((Date.now() - start) / 1000);
-      navigator.sendBeacon(
-        webhook,
-        JSON.stringify({
-          name,
-          docUrl,
-          duration,
-          reason,
-          timestamp: new Date().toISOString()
-        })
-      );
+  // create new session if none or expired
+  async function ensureSession() {
+    if (session && session.sessionId && session.expiresAt && Date.now() < session.expiresAt) {
+      return session;
     }
-  </script>
+    const payload = { name, docUrl };
+    const res = await postJson(START_URL, payload);
+    if (res && res.sessionId) {
+      // store session; expiresAt from server or default 4h
+      session = {
+        sessionId: res.sessionId,
+        createdAt: Date.now(),
+        expiresAt: Date.now() + (res.ttlMs || 4*60*60*1000)
+      };
+      localStorage.setItem(LS_KEY, JSON.stringify(session));
+      return session;
+    } else {
+      // fallback: still create a local sessionId (less secure)
+      const sid = 'local-' + Math.random().toString(36).slice(2,12);
+      session = { sessionId: sid, createdAt: Date.now(), expiresAt: Date.now() + 60*60*1000 };
+      localStorage.setItem(LS_KEY, JSON.stringify(session));
+      return session;
+    }
+  }
+
+  // heartbeat loop (every 5s)
+  let hbTimer = null;
+  let lastActivityTs = Date.now();
+
+  // consider user active on these events
+  ['mousemove','keydown','click','scroll','touchstart'].forEach(evt=>{
+    window.addEventListener(evt, ()=>{ lastActivityTs = Date.now(); });
+  });
+
+  await ensureSession();
+
+  async function sendHeartbeat() {
+    if (!session) return;
+    const body = { sessionId: session.sessionId, ts: new Date().toISOString() };
+    // include 'active' flag if user has recent activity (<10s)
+    body.active = (Date.now() - lastActivityTs) < 10000;
+    // use fetch (regular) because frequent
+    await postJson(HB_URL, body);
+  }
+
+  // start HB after ensuring session
+  hbTimer = setInterval(sendHeartbeat, 5000);
+  // send immediate first heartbeat
+  sendHeartbeat().catch(()=>{});
+
+  // before unload -> end session using sendBeacon if available
+  function endSession(reason = 'closed') {
+    if (!session) return;
+    const payload = {
+      sessionId: session.sessionId,
+      reason,
+      ts: new Date().toISOString()
+    };
+    // navigator.sendBeacon to increase chance of delivery on unload
+    try {
+      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+      navigator.sendBeacon(END_URL, blob);
+    } catch (e) {
+      // fallback synchronous fetch (try best effort)
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", END_URL, false); // sync
+      xhr.setRequestHeader("Content-Type", "application/json");
+      try { xhr.send(JSON.stringify(payload)); } catch(e){ /* ignore */ }
+    }
+    // clear local storage so next load creates new session (if you want single-use)
+    localStorage.removeItem(LS_KEY);
+  }
+
+  window.addEventListener('beforeunload', ()=> endSession('closed'));
+  // also if user explicitly presses "finish" or a button, you can call endSession('finished')
+
+})();
+</script>
 </body>
 </html>

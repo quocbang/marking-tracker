@@ -15,7 +15,7 @@
   const docUrl = params.get('doc');
   if(!docUrl) { document.body.innerHTML = '<h3>Missing ?doc= param</h3>'; return; }
 
-  const BACKEND = 'https://https://n8n-mac.quocbangdev.asia/webhook/marking-log'; // thay bằng server của bạn
+  const BACKEND = 'https://n8n-mac.quocbangdev.asia/webhook/marking-log'; // thay bằng server của bạn
   const START_URL = BACKEND + '/start';
   const HB_URL = BACKEND + '/heartbeat';
   const END_URL = BACKEND + '/end';

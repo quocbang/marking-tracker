@@ -2,87 +2,6 @@
   "nodes": [
     {
       "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyMinute"
-            }
-          ]
-        },
-        "documentId": {
-          "__rl": true,
-          "value": "1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M",
-          "mode": "list",
-          "cachedResultName": "Tracking Sessions",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "gid=123456789",
-          "mode": "list",
-          "cachedResultName": "Bài Chấm",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit#gid=123456789"
-        },
-        "options": {}
-      },
-      "id": "trigger-status-change",
-      "name": "Monitor Bài Chấm Sheet",
-      "type": "n8n-nodes-base.googleSheetsTrigger",
-      "typeVersion": 2,
-      "position": [
-        -800,
-        100
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "umrAZGShoRxgB742",
-          "name": "bangquoc9-sheet"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": false,
-            "leftValue": "",
-            "typeValidation": "loose"
-          },
-          "conditions": [
-            {
-              "id": "status-completed",
-              "leftValue": "={{ $json['Trạng Thái'] }}",
-              "rightValue": "Đã chữa",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            },
-            {
-              "id": "has-session-id",
-              "leftValue": "={{ $json.sessionId }}",
-              "rightValue": "",
-              "operator": {
-                "type": "string",
-                "operation": "notEmpty"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "check-status-completed",
-      "name": "Check Status = Đã chữa",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        -600,
-        100
-      ]
-    },
-    {
-      "parameters": {
         "documentId": {
           "__rl": true,
           "value": "1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M",
@@ -100,20 +19,20 @@
         "filtersUI": {
           "values": [
             {
-              "lookupColumn": "sessionId",
-              "lookupValue": "={{ $json.sessionId }}"
+              "lookupColumn": "docUrl",
+              "lookupValue": "={{ $json.docUrl }}"
             }
           ]
         },
         "options": {}
       },
-      "id": "lookup-session-status",
+      "id": "c67a3459-cde4-48e8-bcfc-268d38b8087f",
       "name": "Lookup Session in Sessions Sheet",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        -400,
-        0
+        -940,
+        -20
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -128,7 +47,8 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "loose"
+            "typeValidation": "loose",
+            "version": 2
           },
           "conditions": [
             {
@@ -152,15 +72,16 @@
           ],
           "combinator": "and"
         },
+        "looseTypeValidation": true,
         "options": {}
       },
-      "id": "check-session-not-used",
+      "id": "bdb19786-0b92-448e-ae76-0d5e0b96eb15",
       "name": "Check Session Not Used",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -200,
-        0
+        -720,
+        -20
       ]
     },
     {
@@ -189,13 +110,13 @@
         },
         "options": {}
       },
-      "id": "prepare-end-payload",
+      "id": "44164d0d-f27e-433f-a481-35b0f6a038b3",
       "name": "Prepare End Payload",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        0,
-        -100
+        -540,
+        -120
       ]
     },
     {
@@ -230,29 +151,29 @@
         },
         "options": {}
       },
-      "id": "call-end-endpoint",
+      "id": "e4b21b7b-bcba-4740-91ce-8270b468e2dd",
       "name": "Call End Endpoint",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        200,
-        -100
+        -340,
+        -120
       ]
     },
     {
       "parameters": {
         "content": "## Status Monitor Workflow Complete\n\n**Session ID:** `{{ $json.sessionId }}`\n**Reason:** status_updated\n**Result:** Session ended successfully via status change",
-        "height": 80,
-        "width": 400,
+        "height": 340,
+        "width": 640,
         "color": 4
       },
-      "id": "note-success",
+      "id": "f982c6d5-69ce-4522-9c81-f1997dc67471",
       "name": "Success Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        400,
-        -200
+        -800,
+        -300
       ]
     },
     {
@@ -262,39 +183,247 @@
         "width": 300,
         "color": 6
       },
-      "id": "note-ignored",
+      "id": "4d7de9ce-ac01-4fc9-9b08-73206de9ef58",
       "name": "Ignored Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -200,
-        200
+        -560,
+        40
       ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU",
+          "mode": "list",
+          "cachedResultName": "Chấm Điểm",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "grading",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit#gid=0"
+        },
+        "event": "rowUpdate",
+        "options": {
+          "columnsToWatch": [
+            "Trạng Thái"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1640,
+        80
+      ],
+      "id": "b64da1be-04da-4b6b-97f3-14e4f04cb906",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "YQvOXyzlMJYBVdtR",
+          "name": "BangQuoc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "Đã chữa",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "8dfe083c-69ab-414f-966b-7601051ca371"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Đã chữa"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "bb4fcc12-b864-4d64-9492-dd4012ffedff",
+                    "leftValue": "{{ $json.status }}",
+                    "rightValue": "Lỗi",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Lỗi"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1220,
+        80
+      ],
+      "id": "5521b146-ee04-48db-bcff-d8ffff3acfb5",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c6403a8f-94e7-4f03-babe-90fdaedd64b0",
+              "name": "status",
+              "value": "={{ $json['Trạng Thái'] }}",
+              "type": "string"
+            },
+            {
+              "id": "ccbe58e9-dd79-4668-a18d-f9142023368c",
+              "name": "docUrl",
+              "value": "={{ $json[\"Link\"].match(/https:\\/\\/docs\\.google\\.com\\/document\\/d\\/[A-Za-z0-9_-]+\\/edit\\?usp=sharing/)?.[0] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1420,
+        80
+      ],
+      "id": "a54fdbba-c5c5-48a0-9fa2-cd7c3dc1d849",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M",
+          "mode": "list",
+          "cachedResultName": "Tracking Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "docUrl",
+              "lookupValue": "={{ $json.docUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "db9f98a0-a4c3-42f3-baf2-bc79af6ff76d",
+      "name": "Lookup Session in Sessions Sheet1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -940,
+        260
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "umrAZGShoRxgB742",
+          "name": "bangquoc9-sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Delete session",
+        "height": 420,
+        "width": 900
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -980,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "6cdb3685-0d1a-409d-8904-6bae5ea956aa",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M",
+          "mode": "list",
+          "cachedResultName": "Tracking Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit#gid=0"
+        },
+        "startIndex": "={{ $json.row_number }}"
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -720,
+        260
+      ],
+      "id": "771a7d32-3978-47ab-ac91-59dc00b2b13e",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "umrAZGShoRxgB742",
+          "name": "bangquoc9-sheet"
+        }
+      }
     }
   ],
   "connections": {
-    "Monitor Bài Chấm Sheet": {
-      "main": [
-        [
-          {
-            "node": "Check Status = Đã chữa",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check Status = Đã chữa": {
-      "main": [
-        [
-          {
-            "node": "Lookup Session in Sessions Sheet",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Lookup Session in Sessions Sheet": {
       "main": [
         [
@@ -322,6 +451,57 @@
         [
           {
             "node": "Call End Endpoint",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Lookup Session in Sessions Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Lookup Session in Sessions Sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Session in Sessions Sheet1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
             "type": "main",
             "index": 0
           }

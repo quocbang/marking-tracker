@@ -22,12 +22,6 @@
         "assignments": {
           "assignments": [
             {
-              "id": "sessionId",
-              "name": "sessionId",
-              "value": "={{ $jmespath($json, 'body.name') }}-{{ $now.toISO().split('T')[0] }}-{{ $now.toMillis() }}-{{ $runIndex }}",
-              "type": "string"
-            },
-            {
               "id": "name",
               "name": "name",
               "value": "={{ $jmespath($json, 'body.name') }}",
@@ -37,6 +31,114 @@
               "id": "docUrl",
               "name": "docUrl",
               "value": "={{ $jmespath($json, 'body.docUrl') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1a1a1a1-b2b2-c3c3-d4d4-e5e5e5e5e5e5",
+      "name": "Extract Request Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU",
+          "mode": "list",
+          "cachedResultName": "Chấm Điểm",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "grading",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Link",
+              "lookupValue": "={{ $json.docUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2b2b2b2-c3c3-d4d4-e5e5-f6f6f6f6f6f6",
+      "name": "Check Status in Grading Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        520,
+        -220
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YQvOXyzlMJYBVdtR",
+          "name": "BangQuoc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "status-not-error",
+              "leftValue": "={{ $json['Trạng Thái'] }}",
+              "rightValue": "Lỗi",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c3c3c3c3-d4d4-e5e5-f6f6-a7a7a7a7a7a7",
+      "name": "Check Status Not Error",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "sessionId",
+              "name": "sessionId",
+              "value": "={{ $('Extract Request Data').item.json.name }}-{{ $now.toISO().split('T')[0] }}-{{ $now.toMillis() }}-{{ $runIndex }}",
+              "type": "string"
+            },
+            {
+              "id": "name",
+              "name": "name",
+              "value": "={{ $('Extract Request Data').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "docUrl",
+              "name": "docUrl",
+              "value": "={{ $('Extract Request Data').item.json.docUrl }}",
               "type": "string"
             },
             {
@@ -96,8 +198,41 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        320,
-        -220
+        920,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"error\", \"error_code\": \"STATUS_NOT_READY\", \"message\": \"Document status is in error state (Lỗi). Please fix the status before starting a session.\" } }}",
+        "options": {
+          "responseCode": 400,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "d4d4d4d4-e5e5-f6f6-a7a7-b8b8b8b8b8b8",
+      "name": "Respond Status Not Ready",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        920,
+        -120
       ]
     },
     {
@@ -314,8 +449,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        520,
-        -220
+        1120,
+        -320
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -352,8 +487,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        720,
-        -220
+        1320,
+        -320
       ]
     }
   ],
@@ -362,7 +497,47 @@
       "main": [
         [
           {
+            "node": "Extract Request Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Request Data": {
+      "main": [
+        [
+          {
+            "node": "Check Status in Grading Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Status in Grading Sheet": {
+      "main": [
+        [
+          {
+            "node": "Check Status Not Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Status Not Error": {
+      "main": [
+        [
+          {
             "node": "Set Session Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Status Not Ready",
             "type": "main",
             "index": 0
           }

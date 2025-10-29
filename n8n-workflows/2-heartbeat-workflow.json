@@ -7,13 +7,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "6d288e83-ad43-40c5-87a6-5389f9eae14e",
+      "id": "0a3ed6da-fd1e-43c7-abbf-f70180b98ede",
       "name": "Webhook Heartbeat",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
       "position": [
-        -800,
-        100
+        -1100,
+        40
       ],
       "webhookId": "heartbeat-session"
     },
@@ -49,13 +49,13 @@
         },
         "options": {}
       },
-      "id": "524ffe20-cc89-4703-808f-190617ca63b4",
+      "id": "f3b3028c-5056-4392-9236-89aba7391a43",
       "name": "Extract Heartbeat Data",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -600,
-        100
+        -780,
+        -60
       ]
     },
     {
@@ -84,13 +84,13 @@
         },
         "options": {}
       },
-      "id": "72945581-d9a9-46d6-bda6-c9d7f4ea3fa9",
+      "id": "828b9ecb-68ea-4cc9-9df3-9e42951a6fbf",
       "name": "Lookup Session",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        -400,
-        100
+        -780,
+        180
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -98,6 +98,38 @@
           "name": "bangquoc9-sheet"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "has-results",
+              "leftValue": "={{ $input.all().length }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Check Session Found",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -540,
+        180
+      ]
     },
     {
       "parameters": {
@@ -133,13 +165,13 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "39ccb312-7839-4430-8a76-334c12afa4c8",
+      "id": "08fcf761-5f6b-4183-a12e-04b78070350a",
       "name": "Check Session Valid",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -200,
-        100
+        -20,
+        40
       ]
     },
     {
@@ -147,13 +179,13 @@
         "language": "python",
         "pythonCode": "import time\nfrom datetime import datetime\n\n# Calculate time delta and update accumulated active time\nfor item in _input.all():\n  json = item.json\n  \n  # Get current time (now)\n  current_time_ms = int(time.time() * 1000)\n  \n  # Get data from Google Sheets lookup\n  last_heartbeat_ms = int(json.get('lastHeartbeatMs', current_time_ms))\n  accumulated_active_ms = int(json.get('accumulatedActiveMs', 0))\n  \n  # Get active flag from heartbeat request (passed through from Extract node)\n  active = json.get('active') in [True, 'true']\n  \n  # Calculate delta in milliseconds\n  delta_ms = current_time_ms - last_heartbeat_ms\n  \n  # Only add to accumulated time if active flag is true\n  # This ensures we only count time when user is actually interacting\n  new_accumulated_active_ms = accumulated_active_ms\n  \n  if active == True:\n    # Cap the delta to prevent huge jumps (max 5 minutes per heartbeat)\n    max_delta_ms = 300000  # 5 minutes\n    if delta_ms <= max_delta_ms:\n      new_accumulated_active_ms = accumulated_active_ms + delta_ms\n    # If delta is too large, don't add it (likely network issue or tab was suspended)\n  \n  # Update item with new calculated fields\n  item.json['deltaMs'] = delta_ms\n  item.json['newAccumulatedActiveMs'] = new_accumulated_active_ms\n  item.json['newLastHeartbeatMs'] = current_time_ms\n  item.json['newLastHeartbeat'] = datetime.fromtimestamp(current_time_ms / 1000).isoformat() + 'Z'\n  item.json['newTtlAt'] = datetime.fromtimestamp((current_time_ms + 14400000) / 1000).isoformat() + 'Z'\n\nreturn _input.all()"
       },
-      "id": "255a7992-c0f1-4b58-9419-3f97299cb76c",
+      "id": "f40052d6-1fd4-43ea-b24d-0f69ddadb49c",
       "name": "Calculate Delta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        0,
-        0
+        180,
+        -60
       ]
     },
     {
@@ -383,13 +415,13 @@
         },
         "options": {}
       },
-      "id": "e4ca5147-e8c7-49bc-bc91-785b7231718d",
+      "id": "f2de3f2c-f14b-4866-b647-1da70c0cfcf8",
       "name": "Update Session",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        200,
-        0
+        380,
+        -60
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -421,38 +453,95 @@
           }
         }
       },
-      "id": "13ce2634-1c1e-4bf0-989f-ebeaef742467",
+      "id": "3dcee08e-d98d-407c-a184-764152870e20",
       "name": "Respond Heartbeat OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        400,
-        0
+        580,
+        -60
       ]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { \"status\": \"error\", \"message\": \"Session not found or already used\" } }}",
+        "responseBody": "={{ { \"status\": \"error\", \"error_code\": \"SESSION_NOT_FOUND\", \"message\": \"Session not found\" } }}",
         "options": {
+          "responseCode": 404,
           "responseHeaders": {
             "entries": [
               {
                 "name": "Access-Control-Allow-Origin",
                 "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
               }
             ]
           }
         }
       },
-      "id": "9db45b22-d923-4c4f-ae1d-f7dbf31d2c22",
-      "name": "Respond Not Found",
+      "id": "e1f2g3h4-i5j6-7890-klmn-op1234567890",
+      "name": "Respond Session Not Found",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        0,
-        200
+        -340,
+        320
       ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"error\", \"error_code\": \"SESSION_INVALID\", \"message\": \"Session already used or invalid\" } }}",
+        "options": {
+          "responseCode": 400,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "0b59ef51-c02d-4c39-bba3-3be03fb857ae",
+      "name": "Respond Session Invalid",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        180,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        -340,
+        40
+      ],
+      "id": "6c53712a-22f3-43ea-8aee-d3fdeb82e1d6",
+      "name": "Merge"
     }
   ],
   "connections": {
@@ -471,6 +560,11 @@
       "main": [
         [
           {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
             "node": "Lookup Session",
             "type": "main",
             "index": 0
@@ -482,7 +576,25 @@
       "main": [
         [
           {
-            "node": "Check Session Valid",
+            "node": "Check Session Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Session Found": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Respond Session Not Found",
             "type": "main",
             "index": 0
           }
@@ -500,7 +612,7 @@
         ],
         [
           {
-            "node": "Respond Not Found",
+            "node": "Respond Session Invalid",
             "type": "main",
             "index": 0
           }
@@ -523,6 +635,17 @@
         [
           {
             "node": "Respond Heartbeat OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Check Session Valid",
             "type": "main",
             "index": 0
           }

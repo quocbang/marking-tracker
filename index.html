@@ -50,7 +50,7 @@
   let session = null;
   try { session = JSON.parse(localStorage.getItem(LS_KEY)); } catch(e){ session = null; }
 
-  // helper: call backend
+  // helper: call backend - returns { ok: boolean, data: object, status: number, errorCode?: string }
   async function postJson(url, body) {
     try {
       const res = await fetch(url, {
@@ -59,31 +59,37 @@
         body: JSON.stringify(body),
         credentials: 'omit',
       });
-      return res.ok ? await res.json().catch(()=>null) : null;
+      const data = res.ok ? await res.json().catch(()=>null) : await res.json().catch(()=>null);
+      return {
+        ok: res.ok,
+        status: res.status,
+        data: data,
+        errorCode: data && data.error_code ? data.error_code : null
+      };
     } catch(e){
       console.warn('post error', e);
-      return null;
+      return { ok: false, status: 0, data: null, errorCode: null };
     }
   }
 
   // create new session if none or expired
-  async function ensureSession() {
-    // Check if we have a valid session in localStorage
-    if (session && session.sessionId && session.expiresAt && Date.now() < session.expiresAt) {
+  async function ensureSession(forceNew = false) {
+    // Check if we have a valid session in localStorage (unless forcing new)
+    if (!forceNew && session && session.sessionId && session.expiresAt && Date.now() < session.expiresAt) {
       console.log('Reusing existing session:', session.sessionId);
       return session;
     }
     
     // Create new session
-    console.log('Creating new session...');
+    console.log(forceNew ? 'Creating new session (forced)...' : 'Creating new session...');
     const payload = { name, docUrl };
     const res = await postJson(START_URL, payload);
-    if (res && res.sessionId) {
+    if (res.ok && res.data && res.data.sessionId) {
       // store session; expiresAt from server or default 4h
       session = {
-        sessionId: res.sessionId,
+        sessionId: res.data.sessionId,
         createdAt: Date.now(),
-        expiresAt: Date.now() + (res.ttlMs || 4*60*60*1000)
+        expiresAt: Date.now() + (res.data.ttlMs || 4*60*60*1000)
       };
       localStorage.setItem(LS_KEY, JSON.stringify(session));
       console.log('New session created:', session.sessionId);
@@ -137,8 +143,20 @@
     // include 'active' flag if user has recent activity (<45s)
     // Increased from 10s to 45s to account for reading/thinking time
     body.active = (Date.now() - lastActivityTs) < 45000;
-    // use fetch (regular) because frequent
-    await postJson(HB_URL, body);
+    
+    // Send heartbeat and handle SESSION_NOT_FOUND error
+    const res = await postJson(HB_URL, body);
+    
+    // If session not found, create a new session and retry heartbeat
+    if (!res.ok && res.errorCode === 'SESSION_NOT_FOUND') {
+      console.log('Session not found on server, creating new session...');
+      await ensureSession(true); // Force create new session
+      // Retry heartbeat with new session
+      if (session) {
+        body.sessionId = session.sessionId;
+        await postJson(HB_URL, body);
+      }
+    }
   }
 
   // start HB after ensuring session

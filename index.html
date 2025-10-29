@@ -80,28 +80,47 @@
       return session;
     }
     
-    // Create new session
+    // Create new session - retry until successful
     console.log(forceNew ? 'Creating new session (forced)...' : 'Creating new session...');
     const payload = { name, docUrl };
-    const res = await postJson(START_URL, payload);
-    if (res.ok && res.data && res.data.sessionId) {
-      // store session; expiresAt from server or default 4h
-      session = {
-        sessionId: res.data.sessionId,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + (res.data.ttlMs || 4*60*60*1000)
-      };
-      localStorage.setItem(LS_KEY, JSON.stringify(session));
-      console.log('New session created:', session.sessionId);
-      return session;
-    } else {
-      // fallback: still create a local sessionId (less secure)
-      const sid = 'local-' + Math.random().toString(36).slice(2,12);
-      session = { sessionId: sid, createdAt: Date.now(), expiresAt: Date.now() + 60*60*1000 };
-      localStorage.setItem(LS_KEY, JSON.stringify(session));
-      console.log('Fallback session created:', session.sessionId);
-      return session;
+    
+    let attempts = 0;
+    const maxAttempts = 10;
+    const retryDelay = 2000; // 2 seconds between retries
+    
+    while (attempts < maxAttempts) {
+      attempts++;
+      console.log(`Session creation attempt ${attempts}/${maxAttempts}...`);
+      
+      const res = await postJson(START_URL, payload);
+      
+      if (res.ok && res.data && res.data.sessionId) {
+        // Successfully created session
+        session = {
+          sessionId: res.data.sessionId,
+          createdAt: Date.now(),
+          expiresAt: Date.now() + (res.data.ttlMs || 4*60*60*1000)
+        };
+        localStorage.setItem(LS_KEY, JSON.stringify(session));
+        console.log('New session created:', session.sessionId);
+        return session;
+      } else {
+        // Log error and retry
+        const errorMsg = res.data && res.data.message ? res.data.message : 'Unknown error';
+        const errorCode = res.errorCode || 'UNKNOWN';
+        console.warn(`Session creation failed (${errorCode}): ${errorMsg}`);
+        
+        if (attempts < maxAttempts) {
+          console.log(`Retrying in ${retryDelay/1000} seconds...`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+      }
     }
+    
+    // Failed after all attempts
+    console.error('Failed to create session after maximum attempts');
+    document.body.innerHTML = '<div style="padding:20px;font-family:Arial"><h2>Unable to start session</h2><p>Failed to connect to the tracking system after multiple attempts. Please check your connection and try refreshing the page.</p></div>';
+    throw new Error('Failed to create session');
   }
 
   // heartbeat loop (every 5s)

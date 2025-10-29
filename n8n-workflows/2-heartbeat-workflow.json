@@ -1,0 +1,538 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "marking-log/heartbeat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "6d288e83-ad43-40c5-87a6-5389f9eae14e",
+      "name": "Webhook Heartbeat",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        -800,
+        100
+      ],
+      "webhookId": "heartbeat-session"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "sessionId",
+              "name": "sessionId",
+              "value": "={{ $jmespath($json, 'body.sessionId') }}",
+              "type": "string"
+            },
+            {
+              "id": "ts",
+              "name": "ts",
+              "value": "={{ $jmespath($json, 'body.ts') }}",
+              "type": "string"
+            },
+            {
+              "id": "active",
+              "name": "active",
+              "value": "={{ $jmespath($json, 'body.active') }}",
+              "type": "boolean"
+            },
+            {
+              "id": "currentTimeMs",
+              "name": "currentTimeMs",
+              "value": "={{ $now.toMillis() }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "524ffe20-cc89-4703-808f-190617ca63b4",
+      "name": "Extract Heartbeat Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -600,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M",
+          "mode": "list",
+          "cachedResultName": "Tracking Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "sessionId",
+              "lookupValue": "={{ $json.sessionId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "72945581-d9a9-46d6-bda6-c9d7f4ea3fa9",
+      "name": "Lookup Session",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -400,
+        100
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "umrAZGShoRxgB742",
+          "name": "bangquoc9-sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "session-found",
+              "leftValue": "={{ $json.sessionId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            },
+            {
+              "id": "not-used",
+              "leftValue": "={{ $json.used }}",
+              "rightValue": "=false",
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "39ccb312-7839-4430-8a76-334c12afa4c8",
+      "name": "Check Session Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -200,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "import time\nfrom datetime import datetime\n\n# Calculate time delta and update accumulated active time\nfor item in _input.all():\n  json = item.json\n  \n  # Get current time (now)\n  current_time_ms = int(time.time() * 1000)\n  \n  # Get data from Google Sheets lookup\n  last_heartbeat_ms = int(json.get('lastHeartbeatMs', current_time_ms))\n  accumulated_active_ms = int(json.get('accumulatedActiveMs', 0))\n  \n  # Get active flag from heartbeat request (passed through from Extract node)\n  active = json.get('active') in [True, 'true']\n  \n  # Calculate delta in milliseconds\n  delta_ms = current_time_ms - last_heartbeat_ms\n  \n  # Only add to accumulated time if:\n  # 1. active flag is true, OR\n  # 2. delta is small (< 30 seconds) indicating continuous session\n  new_accumulated_active_ms = accumulated_active_ms\n  \n  if active == True or delta_ms < 30000:\n    new_accumulated_active_ms = accumulated_active_ms + delta_ms\n  \n  # Cap the delta to prevent huge jumps (max 5 minutes per heartbeat)\n  max_delta_ms = 300000  # 5 minutes\n  if delta_ms > max_delta_ms:\n    # Don't add anything if gap is too large\n    new_accumulated_active_ms = accumulated_active_ms\n  \n  # Update item with new calculated fields\n  item.json['deltaMs'] = delta_ms\n  item.json['newAccumulatedActiveMs'] = new_accumulated_active_ms\n  item.json['newLastHeartbeatMs'] = current_time_ms\n  item.json['newLastHeartbeat'] = datetime.fromtimestamp(current_time_ms / 1000).isoformat() + 'Z'\n  item.json['newTtlAt'] = datetime.fromtimestamp((current_time_ms + 14400000) / 1000).isoformat() + 'Z'\n\nreturn _input.all()"
+      },
+      "id": "255a7992-c0f1-4b58-9419-3f97299cb76c",
+      "name": "Calculate Delta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M",
+          "mode": "list",
+          "cachedResultName": "Tracking Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sessionId": "={{ $json.sessionId }}",
+            "lastHeartbeat": "={{ $json.lastHeartbeat }}",
+            "lastHeartbeatMs": "={{ $json.lastHeartbeatMs }}",
+            "accumulatedActiveMs": "={{ $json.accumulatedActiveMs }}",
+            "ttlAt": "={{ $json.ttlAt }}"
+          },
+          "matchingColumns": [
+            "sessionId"
+          ],
+          "schema": [
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "docUrl",
+              "displayName": "docUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "startTime",
+              "displayName": "startTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "startTimeMs",
+              "displayName": "startTimeMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "lastHeartbeat",
+              "displayName": "lastHeartbeat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lastHeartbeatMs",
+              "displayName": "lastHeartbeatMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "accumulatedActiveMs",
+              "displayName": "accumulatedActiveMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "used",
+              "displayName": "used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ttlAt",
+              "displayName": "ttlAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "endTimeMs",
+              "displayName": "endTimeMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "activeSec",
+              "displayName": "activeSec",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "activeMinutes",
+              "displayName": "activeMinutes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "totalElapsedSec",
+              "displayName": "totalElapsedSec",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "activityPercentage",
+              "displayName": "activityPercentage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "finalAccumulatedActiveMs",
+              "displayName": "finalAccumulatedActiveMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "e4ca5147-e8c7-49bc-bc91-785b7231718d",
+      "name": "Update Session",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        200,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "umrAZGShoRxgB742",
+          "name": "bangquoc9-sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"ok\", \"sessionId\": $json.sessionId, \"deltaMs\": $json.deltaMs, \"accumulatedActiveMs\": $json.newAccumulatedActiveMs } }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "13ce2634-1c1e-4bf0-989f-ebeaef742467",
+      "name": "Respond Heartbeat OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"error\", \"message\": \"Session not found or already used\" } }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "9db45b22-d923-4c4f-ae1d-f7dbf31d2c22",
+      "name": "Respond Not Found",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Heartbeat": {
+      "main": [
+        [
+          {
+            "node": "Extract Heartbeat Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Heartbeat Data": {
+      "main": [
+        [
+          {
+            "node": "Lookup Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Session": {
+      "main": [
+        [
+          {
+            "node": "Check Session Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Session Valid": {
+      "main": [
+        [
+          {
+            "node": "Calculate Delta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Delta": {
+      "main": [
+        [
+          {
+            "node": "Update Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Session": {
+      "main": [
+        [
+          {
+            "node": "Respond Heartbeat OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b9abc2a99c69957c091b96c25d48690c3bbd89cffa33ca8d5bfc1f6b14755b1"
+  }
+}

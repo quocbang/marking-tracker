@@ -1,0 +1,400 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "marking-log/start",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "713a3b24-db49-4d8d-99dc-6f98c376a14e",
+      "name": "Webhook Start",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        120,
+        -220
+      ],
+      "webhookId": "start-session"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "sessionId",
+              "name": "sessionId",
+              "value": "={{ $jmespath($json, 'body.name') }}-{{ $now.toISO().split('T')[0] }}-{{ $now.toMillis() }}-{{ $runIndex }}",
+              "type": "string"
+            },
+            {
+              "id": "name",
+              "name": "name",
+              "value": "={{ $jmespath($json, 'body.name') }}",
+              "type": "string"
+            },
+            {
+              "id": "docUrl",
+              "name": "docUrl",
+              "value": "={{ $jmespath($json, 'body.docUrl') }}",
+              "type": "string"
+            },
+            {
+              "id": "startTime",
+              "name": "startTime",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "startTimeMs",
+              "name": "startTimeMs",
+              "value": "={{ $now.toMillis() }}",
+              "type": "number"
+            },
+            {
+              "id": "lastHeartbeat",
+              "name": "lastHeartbeat",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "lastHeartbeatMs",
+              "name": "lastHeartbeatMs",
+              "value": "={{ $now.toMillis() }}",
+              "type": "number"
+            },
+            {
+              "id": "accumulatedActiveMs",
+              "name": "accumulatedActiveMs",
+              "value": "=0",
+              "type": "number"
+            },
+            {
+              "id": "used",
+              "name": "used",
+              "value": "=false",
+              "type": "boolean"
+            },
+            {
+              "id": "ttlAt",
+              "name": "ttlAt",
+              "value": "={{ $now.plus(4, 'hours').toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "ttlMs",
+              "name": "ttlMs",
+              "value": "=14400000",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bddbc34d-cdea-40ec-9d0e-aab1367dda4f",
+      "name": "Set Session Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M",
+          "mode": "list",
+          "cachedResultName": "Tracking Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sessionId": "={{ $json.sessionId }}",
+            "name": "={{ $json.name }}",
+            "docUrl": "={{ $json.docUrl }}",
+            "startTime": "={{ $json.startTime }}",
+            "startTimeMs": "={{ $json.startTimeMs }}",
+            "lastHeartbeat": "={{ $json.lastHeartbeat }}",
+            "lastHeartbeatMs": "={{ $json.lastHeartbeatMs }}",
+            "accumulatedActiveMs": "={{ $json.accumulatedActiveMs }}",
+            "used": "={{ $json.used }}",
+            "ttlAt": "={{ $json.ttlAt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "docUrl",
+              "displayName": "docUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "startTime",
+              "displayName": "startTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "startTimeMs",
+              "displayName": "startTimeMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lastHeartbeat",
+              "displayName": "lastHeartbeat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lastHeartbeatMs",
+              "displayName": "lastHeartbeatMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "accumulatedActiveMs",
+              "displayName": "accumulatedActiveMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "used",
+              "displayName": "used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ttlAt",
+              "displayName": "ttlAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "endTimeMs",
+              "displayName": "endTimeMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "activeSec",
+              "displayName": "activeSec",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "activeMinutes",
+              "displayName": "activeMinutes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "totalElapsedSec",
+              "displayName": "totalElapsedSec",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "activityPercentage",
+              "displayName": "activityPercentage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "finalAccumulatedActiveMs",
+              "displayName": "finalAccumulatedActiveMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "8bd77d7c-6898-4880-906d-c75d63bdee2d",
+      "name": "Append to Sessions Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        520,
+        -220
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "umrAZGShoRxgB742",
+          "name": "bangquoc9-sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"sessionId\": $json.sessionId, \"ttlMs\": $json.ttlMs, \"startTime\": $json.startTime } }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "34d13b0b-d863-4072-b8ea-7620c17f1524",
+      "name": "Respond to Start",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        -220
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Start": {
+      "main": [
+        [
+          {
+            "node": "Set Session Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Session Data": {
+      "main": [
+        [
+          {
+            "node": "Append to Sessions Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append to Sessions Sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Start",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b9abc2a99c69957c091b96c25d48690c3bbd89cffa33ca8d5bfc1f6b14755b1"
+  }
+}

@@ -11,8 +11,12 @@ Mục tiêu: đo **t## B. Frontend behavior (tracking.html)
    * Gán `iframe.src = doc` để hiển thị Google Doc.
 2. Heartbeat:
 
-   * Bắt event hoạt động (`mousemove`, `keydown`, `click`, `scroll`, `touchstart`) để cập nhật `lastActivityTs`.
+   * Bắt event hoạt động để cập nhật `lastActivityTs`:
+     - **User interaction**: `mousemove`, `keydown`, `click`, `scroll`, `touchstart` trên trang tracking
+     - **Tab focus**: `window.focus`, `visibilitychange` (khi tab được focus hoặc chuyển từ hidden→visible)
+     - **Iframe focus**: Khi user click vào Google Doc iframe, cập nhật `lastActivityTs`
    * Gửi POST `/heartbeat` mỗi 5s: `{ sessionId, ts, active }` (active = true nếu có activity trong 10s).
+   * **Lưu ý**: Do cross-origin policy, không thể bắt trực tiếp sự kiện typing trong Google Doc. Chỉ có thể detect khi user focus vào iframe.
 3. End:
 
    * **Reload page** → session KHÔNG kết thúc, heartbeat tiếp tục sau khi page load lại.
@@ -75,8 +79,31 @@ Flow ngắn gọn:
    * Gán `iframe.src = doc` để hiển thị Google Doc.
 2. Heartbeat:
 
-   * Bắt event hoạt động (`mousemove`, `keydown`, `click`, `scroll`, `touchstart`) để cập nhật `lastActivityTs`.
+   * Bắt event hoạt động để cập nhật `lastActivityTs`:
+     - **User interaction**: `mousemove`, `keydown`, `click`, `scroll`, `touchstart` trên trang tracking
+     - **Tab focus**: `window.focus`, `visibilitychange` (khi tab được focus hoặc chuyển từ hidden→visible)
+     - **Iframe focus**: Khi user click vào Google Doc iframe, cập nhật `lastActivityTs`
    * Gửi POST `/heartbeat` mỗi 5s: `{ sessionId, ts, active }` (active = true nếu có activity trong 10s).
+   * **Lưu ý**: Do cross-origin policy, không thể bắt trực tiếp sự kiện typing trong Google Doc. Chỉ có thể detect khi user focus vào iframe.
+   * **Implementation code**:
+     ```javascript
+     // Track user interactions
+     ['mousemove','keydown','click','scroll','touchstart'].forEach(evt=>{
+       window.addEventListener(evt, ()=>{ lastActivityTs = Date.now(); });
+     });
+     
+     // Track tab focus
+     window.addEventListener('focus', ()=>{ lastActivityTs = Date.now(); });
+     document.addEventListener('visibilitychange', ()=>{
+       if (!document.hidden) lastActivityTs = Date.now();
+     });
+     
+     // Track iframe focus (when user clicks into Google Doc)
+     const iframe = document.getElementById('docFrame');
+     iframe.addEventListener('load', ()=>{
+       iframe.addEventListener('focus', ()=>{ lastActivityTs = Date.now(); });
+     });
+     ```
 3. End:
 
    * Khi `beforeunload` (đóng tab/refresh) hoặc khi người dùng nhấn “Finish”, gọi `navigator.sendBeacon('/end', payload)` để đảm bảo gửi tin khi tab đóng.
@@ -220,8 +247,9 @@ POST /end
 # 8) Implementation tips / recommended defaults
 
 * Heartbeat interval: **5s** (you chose) — good balance. Could increase to 10s to reduce load.
-* Active threshold: consider `active` if lastActivity within 10s.
+* Active threshold: consider `active` if lastActivity within **30-60s** (increased from 10s to account for reading/thinking time).
 * Idle threshold to consider "inactive": 300s (5 min).
+* **Activity detection**: Track not only mouse/keyboard events but also tab focus and iframe focus to capture reading/grading behavior.
 * TTL for session: 4 hours (or per-day).
 * Storage: start with Google Sheets for speed; switch to PostgreSQL when stable.
 * Use `navigator.sendBeacon` for reliable end sends.

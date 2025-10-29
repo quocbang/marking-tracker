@@ -91,13 +91,36 @@
     window.addEventListener(evt, ()=>{ lastActivityTs = Date.now(); });
   });
 
+  // Track tab focus (when user switches back to this tab)
+  window.addEventListener('focus', ()=>{ lastActivityTs = Date.now(); });
+  
+  // Track visibility change (when tab becomes visible)
+  document.addEventListener('visibilitychange', ()=>{
+    if (!document.hidden) lastActivityTs = Date.now();
+  });
+
+  // Track iframe focus (when user clicks into Google Doc)
+  iframe.addEventListener('load', ()=>{
+    try {
+      // Try to add focus listener after iframe loads
+      iframe.contentWindow.addEventListener('focus', ()=>{ lastActivityTs = Date.now(); }, true);
+    } catch(e) {
+      // If cross-origin, fallback to just tracking iframe element focus
+      console.log('Cannot track iframe content focus (cross-origin), using iframe element focus');
+    }
+  });
+  
+  // Also track when iframe element itself receives focus
+  iframe.addEventListener('focus', ()=>{ lastActivityTs = Date.now(); });
+
   await ensureSession();
 
   async function sendHeartbeat() {  
     if (!session) return;
     const body = { sessionId: session.sessionId, ts: new Date().toISOString() };
-    // include 'active' flag if user has recent activity (<10s)
-    body.active = (Date.now() - lastActivityTs) < 10000;
+    // include 'active' flag if user has recent activity (<45s)
+    // Increased from 10s to 45s to account for reading/thinking time
+    body.active = (Date.now() - lastActivityTs) < 45000;
     // use fetch (regular) because frequent
     await postJson(HB_URL, body);
   }

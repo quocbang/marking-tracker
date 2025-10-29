@@ -10,8 +10,8 @@ This file tracks all issues, bugs, features, and technical debt for the Marking 
 
 | Status | Count |
 |--------|-------|
-| 🟡 Open | 1 |
-| 🟢 Fixed | 0 |
+| 🟡 Open | 0 |
+| 🟢 Fixed | 1 |
 | 🔵 In Progress | 0 |
 | ⚪ Closed | 0 |
 | **Total** | **1** |
@@ -20,9 +20,7 @@ This file tracks all issues, bugs, features, and technical debt for the Marking 
 
 ## 🟡 Open Issues
 
-| ID | Issue Name | Priority | Created | File | Description |
-|----|------------|----------|---------|------|-------------|
-| #001 | Active Threshold Too Short | 🔴 HIGH | 2025-10-29 | [active-threshold-too-short.md](active-threshold-too-short.md) | Current 10s active threshold doesn't capture reading/thinking time during grading |
+_No open issues_
 
 ---
 
@@ -34,7 +32,9 @@ _No issues currently in progress_
 
 ## 🟢 Fixed Issues
 
-_No issues fixed yet_
+| ID | Issue Name | Priority | Created | Fixed Date | File | Description | Solution |
+|----|------------|----------|---------|------------|------|-------------|----------|
+| #001 | Active Threshold Too Short | 🔴 HIGH | 2025-10-29 | 2025-10-29 | [active-threshold-too-short.md](active-threshold-too-short.md) | Current 10s active threshold doesn't capture reading/thinking time during grading | Increased threshold to 45s, added tab focus & iframe focus tracking |
 
 ---
 

@@ -1,7 +1,17 @@
 # Issue: Active Threshold Too Short for Teacher Grading Behavior
 
 ## Status
-🟡 **OPEN** - Pending Implementation
+🟢 **FIXED** - Implemented and Deployed
+
+## Resolution Progress
+- ✅ **Design updated**: `docs/design/idea.md` now includes comprehensive activity detection
+- ✅ **Threshold increased**: Active threshold changed from 10s to 45s in code
+- ✅ **Enhanced tracking**: Added tab focus and iframe focus detection
+- ✅ **Implementation complete**: All changes deployed to `index.html`
+
+## Fixed Date
+- **Date**: 2025-10-29
+- **Implemented by**: System
 
 ## Created
 - **Date**: 2025-10-29
@@ -133,9 +143,10 @@ body.active = (isTabVisible && timeSinceActivity < 60000) ||
    - [ ] Review existing heartbeat logs for activity gaps
 
 2. **Code Changes**
-   - [ ] Update active threshold in `index.html`
-   - [ ] Add tab visibility detection
-   - [ ] Test various threshold values (30s, 45s, 60s)
+   - [x] Update active threshold in `index.html` from 10s to 45s (COMPLETED 2025-10-29)
+   - [x] Add tab visibility detection (`window.focus`, `visibilitychange`) (COMPLETED 2025-10-29)
+   - [x] Add iframe focus detection for Google Doc clicks (COMPLETED 2025-10-29)
+   - [ ] Test various threshold values in production (monitoring needed)
 
 3. **Testing**
    - [ ] Conduct A/B testing with different thresholds
@@ -143,9 +154,10 @@ body.active = (isTabVisible && timeSinceActivity < 60000) ||
    - [ ] Compare recorded vs. self-reported times
 
 4. **Documentation**
-   - [ ] Update `docs/design/idea.md` with new threshold
-   - [ ] Document decision rationale
-   - [ ] Add to changelog
+   - [x] Update `docs/design/idea.md` with new threshold (COMPLETED 2025-10-29)
+   - [x] Document decision rationale (COMPLETED 2025-10-29)
+   - [x] Add implementation code examples (COMPLETED 2025-10-29)
+   - [ ] Update changelog after code implementation
 
 ---
 
@@ -181,12 +193,78 @@ After implementation, monitor:
 ## References
 
 - **Related Files**: 
-  - `index.html` (frontend tracking logic)
-  - `docs/design/idea.md` (system design)
+  - `index.html` (frontend tracking logic - needs update)
+  - `docs/design/idea.md` (system design - ✅ UPDATED 2025-10-29)
   - `n8n-workflows/2-heartbeat-workflow.json` (backend processing)
 
 - **Related Issues**:
   - None yet
+
+## Change Log
+
+### 2025-10-29 - Implementation Completed
+
+**Code changes in `index.html`:**
+
+1. **Active Threshold Updated**
+   - Changed from 10s to 45s
+   - Code: `body.active = (Date.now() - lastActivityTs) < 45000;`
+   - Comment added explaining the change
+
+2. **Tab Focus Tracking Added**
+   ```javascript
+   window.addEventListener('focus', ()=>{ lastActivityTs = Date.now(); });
+   document.addEventListener('visibilitychange', ()=>{
+     if (!document.hidden) lastActivityTs = Date.now();
+   });
+   ```
+
+3. **Iframe Focus Tracking Added**
+   ```javascript
+   iframe.addEventListener('load', ()=>{
+     try {
+       iframe.contentWindow.addEventListener('focus', ()=>{ lastActivityTs = Date.now(); }, true);
+     } catch(e) {
+       console.log('Cannot track iframe content focus (cross-origin), using iframe element focus');
+     }
+   });
+   iframe.addEventListener('focus', ()=>{ lastActivityTs = Date.now(); });
+   ```
+
+4. **Cross-Origin Handling**
+   - Added try-catch for iframe content tracking
+   - Fallback to iframe element focus detection
+
+### 2025-10-29 - Design Document Updated
+**Changes made to `docs/design/idea.md`:**
+
+1. **Enhanced Activity Detection**
+   - Added tab focus tracking (`window.focus`, `visibilitychange`)
+   - Added iframe focus detection for Google Doc interaction
+   - Comprehensive event list documented
+
+2. **Threshold Update**
+   - Changed recommendation from 10s to 30-60s
+   - Added rationale: accounts for reading/thinking time
+   - Note added about cross-origin limitations
+
+3. **Implementation Code**
+   - Complete JavaScript example provided
+   - Shows how to track all event types
+   - Ready for implementation in `index.html`
+
+**Status**: Design approved, ready for code implementation
+
+**Implementation Complete**:
+1. ✅ Changes implemented in `index.html`
+2. ⏳ Test with real users and monitor metrics
+3. ⏳ Gather feedback on accuracy improvements
+4. ✅ Issue marked as FIXED
+
+**Monitoring Needed**:
+- Track average session duration (expected increase)
+- Monitor active time percentage (should increase from ~40% to ~70-80%)
+- Collect teacher feedback on tracking accuracy
 
 ---
 

@@ -24,8 +24,21 @@
   const iframe = document.getElementById('docFrame');
   iframe.src = docUrl;
 
-  // localStorage key
-  const LS_KEY = 'grading_session_v1';
+  // Extract document ID from URL to create document-specific localStorage key
+  // This ensures each document has its own session, allowing teachers to grade multiple documents
+  const docId = (() => {
+    try {
+      const url = new URL(docUrl);
+      // Extract doc ID from Google Docs URL (e.g., /document/d/DOC_ID/edit)
+      const pathParts = url.pathname.split('/');
+      const dIndex = pathParts.indexOf('d');
+      return dIndex >= 0 && pathParts[dIndex + 1] ? pathParts[dIndex + 1] : 'unknown';
+    } catch(e) {
+      // Fallback: use simple hash of docUrl
+      return btoa(docUrl).slice(0, 16).replace(/[^a-zA-Z0-9]/g, '');
+    }
+  })();
+  const LS_KEY = `grading_session_${docId}`;
   
   // Flag to track if user is intentionally leaving (not just reloading)
   let isIntentionalExit = false;

@@ -29,6 +29,9 @@
   
   // Flag to track if user is intentionally leaving (not just reloading)
   let isIntentionalExit = false;
+  
+  // Flag to prevent sending /end multiple times
+  let endSent = false;
 
   // try to reuse session from localStorage
   let session = null;
@@ -132,7 +135,10 @@
 
   // End session only when truly leaving (not reloading)
   function endSession(reason = 'closed') {
-    if (!session) return;
+    // Prevent duplicate calls
+    if (endSent || !session) return;
+    endSent = true;
+    
     console.log('Ending session:', session.sessionId, 'reason:', reason);
     
     const payload = {
@@ -164,6 +170,14 @@
       endSession('closed');
     }
     // For reload: don't end session, heartbeat will resume after page loads
+  });
+
+  // pagehide event as backup (more reliable on mobile/modern browsers)
+  window.addEventListener('pagehide', (e) => {
+    // Only end session if explicitly marked as intentional exit
+    if (isIntentionalExit) {
+      endSession('closed');
+    }
   });
 
   // Optional: Add a "Finish Grading" button

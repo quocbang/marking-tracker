@@ -1,0 +1,337 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M",
+          "mode": "list",
+          "cachedResultName": "Tracking Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=123456789",
+          "mode": "list",
+          "cachedResultName": "Bài Chấm",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit#gid=123456789"
+        },
+        "options": {}
+      },
+      "id": "trigger-status-change",
+      "name": "Monitor Bài Chấm Sheet",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        100
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "umrAZGShoRxgB742",
+          "name": "bangquoc9-sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "status-completed",
+              "leftValue": "={{ $json['Trạng Thái'] }}",
+              "rightValue": "Đã chữa",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "has-session-id",
+              "leftValue": "={{ $json.sessionId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-status-completed",
+      "name": "Check Status = Đã chữa",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -600,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M",
+          "mode": "list",
+          "cachedResultName": "Tracking Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "sessionId",
+              "lookupValue": "={{ $json.sessionId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "lookup-session-status",
+      "name": "Lookup Session in Sessions Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -400,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "umrAZGShoRxgB742",
+          "name": "bangquoc9-sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "session-found",
+              "leftValue": "={{ $json.sessionId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            },
+            {
+              "id": "not-used",
+              "leftValue": "={{ $json.used }}",
+              "rightValue": "=false",
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-session-not-used",
+      "name": "Check Session Not Used",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "sessionId",
+              "name": "sessionId",
+              "value": "={{ $json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "reason",
+              "name": "reason",
+              "value": "status_updated",
+              "type": "string"
+            },
+            {
+              "id": "ts",
+              "name": "ts",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "prepare-end-payload",
+      "name": "Prepare End Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n-mac.quocbangdev.asia/webhook/marking-log/end",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "sessionId",
+              "value": "={{ $json.sessionId }}"
+            },
+            {
+              "name": "reason",
+              "value": "={{ $json.reason }}"
+            },
+            {
+              "name": "ts",
+              "value": "={{ $json.ts }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "call-end-endpoint",
+      "name": "Call End Endpoint",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Status Monitor Workflow Complete\n\n**Session ID:** `{{ $json.sessionId }}`\n**Reason:** status_updated\n**Result:** Session ended successfully via status change",
+        "height": 80,
+        "width": 400,
+        "color": 4
+      },
+      "id": "note-success",
+      "name": "Success Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -200
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Ignored Cases\n\n- Status not \"Đã chữa\"\n- No sessionId in row\n- Session already used\n- Session not found",
+        "height": 80,
+        "width": 300,
+        "color": 6
+      },
+      "id": "note-ignored",
+      "name": "Ignored Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Monitor Bài Chấm Sheet": {
+      "main": [
+        [
+          {
+            "node": "Check Status = Đã chữa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Status = Đã chữa": {
+      "main": [
+        [
+          {
+            "node": "Lookup Session in Sessions Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Session in Sessions Sheet": {
+      "main": [
+        [
+          {
+            "node": "Check Session Not Used",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Session Not Used": {
+      "main": [
+        [
+          {
+            "node": "Prepare End Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare End Payload": {
+      "main": [
+        [
+          {
+            "node": "Call End Endpoint",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b9abc2a99c69957c091b96c25d48690c3bbd89cffa33ca8d5bfc1f6b14755b1"
+  }
+}

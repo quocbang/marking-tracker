@@ -46,7 +46,11 @@ Flow ngắn gọn:
 # 2) Thành phần (components)
 
 * **Static frontend**: `tracking.html` (host GitHub Pages, custom domain `tracking.example.com`, có favicon).
-* **n8n workflow**: 3 webhook nodes: `/start`, `/heartbeat`, `/end`. Các node tương tác với storage (Google Sheets, PostgreSQL, Redis).
+* **n8n workflow**: 4 workflows chính:
+  - `/start`: Tạo tracking session mới
+  - `/heartbeat`: Nhận heartbeat và cập nhật thời gian hoạt động
+  - `/end`: Kết thúc session và tính toán metrics
+  - **Status Monitor**: Tự động kết thúc session khi status thay đổi trên sheet "Bài Chấm"
 * **Storage**: Google Sheet (dễ), hoặc PostgreSQL/Redis (production).
 * **Dashboard**: Looker Studio / Google Sheets pivot hoặc bảng tổng hợp n8n.
 
@@ -117,7 +121,7 @@ Flow ngắn gọn:
 
 ## C. n8n workflow (serverless-style)
 
-Bạn chuyển logic server vào n8n nodes. Mô tả 3 webhook chính:
+Bạn chuyển logic server vào n8n nodes. Mô tả 4 workflows chính:
 
 ### 1) `/start` webhook
 
@@ -135,22 +139,95 @@ Bạn chuyển logic server vào n8n nodes. Mô tả 3 webhook chính:
 
   * Lookup session record by `sessionId`. If not found → ignore/return 404.
   * Compute delta = now - lastHeartbeat.
-  * If `active == true` OR delta small (<30s), add delta to `accumulatedActiveMs`.
+  * **Only add delta to `accumulatedActiveMs` if `active == true`** (user is actively interacting).
+  * Cap delta at maximum 5 minutes to prevent huge jumps from network issues.
   * Update `lastHeartbeat = now`, refresh `ttlAt`.
   * (Optional) store raw heartbeat row for debugging.
+
+**Important:** Time is only accumulated when the user is actually active (has interacted within the last 45 seconds). If the user switches tabs or stops interacting, heartbeats will have `active=false` and no time will be added to `accumulatedActiveMs`, even though heartbeats continue to be sent.
 
 ### 3) `/end` webhook
 
 * Input: `{ sessionId, reason, ts }` (sent by sendBeacon)
 * Steps:
 
-  * Lookup session.
-  * If not found / already used → return.
-  * Optionally handle final gap: if lastHeartbeat recent and final delta small, add final delta to accumulatedActiveMs.
-  * Compute `activeSec = round(accumulatedActiveMs / 1000)`.
-  * Sanity checks: cap max value, reject absurd.
-  * Mark session used; write final row (name, docUrl, activeSec, reason, startTime, endTime).
-  * Respond OK.
+  * Lookup session by `sessionId`. If not found / already used → return error.
+  * **Calculate final active duration**:
+    - Get `endTimeMs` (current time), `lastHeartbeatMs`, `accumulatedActiveMs`, `startTimeMs` from session
+    - Calculate `finalDeltaMs = endTimeMs - lastHeartbeatMs` (gap between last heartbeat and end)
+    - If `0 < finalDeltaMs < 30000` (< 30 seconds), add it to accumulated time: `finalAccumulatedActiveMs = accumulatedActiveMs + finalDeltaMs`
+    - Otherwise: `finalAccumulatedActiveMs = accumulatedActiveMs`
+    - Convert to seconds: `activeSec = round(finalAccumulatedActiveMs / 1000)`
+    - Apply sanity check: `activeSec = min(activeSec, 43200)` (cap at 12 hours)
+  * **Calculate metrics**:
+    - `totalElapsedSec = round((endTimeMs - startTimeMs) / 1000)` (total time from start to end)
+    - `activityPercentage = round((activeSec / totalElapsedSec) * 100)` if totalElapsedSec > 0, else 0
+    - `activeMinutes = round(activeSec / 60 * 10) / 10` (rounded to 1 decimal place)
+  * Mark session as `used = true`; update session record with final metrics
+  * Write final row to Completed sheet: `{ sessionId, name, docUrl, startTime, endTime, activeSec, activeMinutes, totalElapsedSec, activityPercentage, reason }`
+  * Respond OK with final metrics
+
+**Calculation pseudo-code**:
+```python
+# Get session data
+endTimeMs = current_timestamp_ms
+lastHeartbeatMs = session.lastHeartbeatMs
+accumulatedActiveMs = session.accumulatedActiveMs
+startTimeMs = session.startTimeMs
+
+# Handle final gap (time between last heartbeat and end)
+finalDeltaMs = endTimeMs - lastHeartbeatMs
+finalAccumulatedActiveMs = accumulatedActiveMs
+if 0 < finalDeltaMs < 30000:  # If gap < 30 seconds, count it as active
+    finalAccumulatedActiveMs += finalDeltaMs
+
+# Convert to seconds and apply limits
+activeSec = round(finalAccumulatedActiveMs / 1000)
+activeSec = min(activeSec, 43200)  # Max 12 hours
+
+# Calculate additional metrics
+totalElapsedSec = round((endTimeMs - startTimeMs) / 1000)
+activityPercentage = round((activeSec / totalElapsedSec) * 100) if totalElapsedSec > 0 else 0
+activeMinutes = round(activeSec / 60 * 10) / 10
+```
+
+### 4) Status Monitor workflow (NEW)
+
+* **Purpose**: Automatically end tracking session when status is updated on "Bài Chấm" sheet
+* **Trigger**: Google Sheets Trigger (polls every 1 minute by default)
+* **Input**: Row changes from sheet "Bài Chấm"
+* **Steps**:
+  
+  1. **Monitor "Bài Chấm" Sheet**: Poll for changes (every 1 min)
+  2. **Check Status = "Đã chữa"**: 
+     - Column "Trạng Thái" equals "Đã chữa"
+     - Row has valid `sessionId`
+  3. **Lookup Session**: Find session in "Sessions" sheet by `sessionId`
+  4. **Check Session Not Used**: Verify `used = FALSE`
+  5. **Call End Endpoint**: HTTP POST to `/end` with:
+     ```json
+     {
+       "sessionId": "...",
+       "reason": "status_updated",
+       "ts": "current_timestamp"
+     }
+     ```
+
+* **Requirements**:
+  - Sheet "Bài Chấm" must have columns: `sessionId`, `Trạng Thái`
+  - Link between "Bài Chấm" and "Sessions" via `sessionId`
+  - Proper gid configuration for "Bài Chấm" sheet
+
+* **Edge Cases Handled**:
+  - User closes tab + status updated simultaneously → only one `/end` call (checks `used` flag)
+  - Status updated multiple times → only first update triggers `/end` (subsequent calls ignored as `used=TRUE`)
+  - No sessionId in row → ignored
+  - Session already ended → ignored
+
+* **Benefits**:
+  - Dual termination methods: manual (Finish button) OR automatic (status update)
+  - Synchronization between grading workflow and time tracking
+  - No need for user to manually close tracking page after finishing
 
 **Storage options in n8n**:
 

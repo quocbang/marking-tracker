@@ -145,7 +145,7 @@
     {
       "parameters": {
         "language": "python",
-        "pythonCode": "import time\nfrom datetime import datetime\n\n# Calculate time delta and update accumulated active time\nfor item in _input.all():\n  json = item.json\n  \n  # Get current time (now)\n  current_time_ms = int(time.time() * 1000)\n  \n  # Get data from Google Sheets lookup\n  last_heartbeat_ms = int(json.get('lastHeartbeatMs', current_time_ms))\n  accumulated_active_ms = int(json.get('accumulatedActiveMs', 0))\n  \n  # Get active flag from heartbeat request (passed through from Extract node)\n  active = json.get('active') in [True, 'true']\n  \n  # Calculate delta in milliseconds\n  delta_ms = current_time_ms - last_heartbeat_ms\n  \n  # Only add to accumulated time if:\n  # 1. active flag is true, OR\n  # 2. delta is small (< 30 seconds) indicating continuous session\n  new_accumulated_active_ms = accumulated_active_ms\n  \n  if active == True or delta_ms < 30000:\n    new_accumulated_active_ms = accumulated_active_ms + delta_ms\n  \n  # Cap the delta to prevent huge jumps (max 5 minutes per heartbeat)\n  max_delta_ms = 300000  # 5 minutes\n  if delta_ms > max_delta_ms:\n    # Don't add anything if gap is too large\n    new_accumulated_active_ms = accumulated_active_ms\n  \n  # Update item with new calculated fields\n  item.json['deltaMs'] = delta_ms\n  item.json['newAccumulatedActiveMs'] = new_accumulated_active_ms\n  item.json['newLastHeartbeatMs'] = current_time_ms\n  item.json['newLastHeartbeat'] = datetime.fromtimestamp(current_time_ms / 1000).isoformat() + 'Z'\n  item.json['newTtlAt'] = datetime.fromtimestamp((current_time_ms + 14400000) / 1000).isoformat() + 'Z'\n\nreturn _input.all()"
+        "pythonCode": "import time\nfrom datetime import datetime\n\n# Calculate time delta and update accumulated active time\nfor item in _input.all():\n  json = item.json\n  \n  # Get current time (now)\n  current_time_ms = int(time.time() * 1000)\n  \n  # Get data from Google Sheets lookup\n  last_heartbeat_ms = int(json.get('lastHeartbeatMs', current_time_ms))\n  accumulated_active_ms = int(json.get('accumulatedActiveMs', 0))\n  \n  # Get active flag from heartbeat request (passed through from Extract node)\n  active = json.get('active') in [True, 'true']\n  \n  # Calculate delta in milliseconds\n  delta_ms = current_time_ms - last_heartbeat_ms\n  \n  # Only add to accumulated time if active flag is true\n  # This ensures we only count time when user is actually interacting\n  new_accumulated_active_ms = accumulated_active_ms\n  \n  if active == True:\n    # Cap the delta to prevent huge jumps (max 5 minutes per heartbeat)\n    max_delta_ms = 300000  # 5 minutes\n    if delta_ms <= max_delta_ms:\n      new_accumulated_active_ms = accumulated_active_ms + delta_ms\n    # If delta is too large, don't add it (likely network issue or tab was suspended)\n  \n  # Update item with new calculated fields\n  item.json['deltaMs'] = delta_ms\n  item.json['newAccumulatedActiveMs'] = new_accumulated_active_ms\n  item.json['newLastHeartbeatMs'] = current_time_ms\n  item.json['newLastHeartbeat'] = datetime.fromtimestamp(current_time_ms / 1000).isoformat() + 'Z'\n  item.json['newTtlAt'] = datetime.fromtimestamp((current_time_ms + 14400000) / 1000).isoformat() + 'Z'\n\nreturn _input.all()"
       },
       "id": "255a7992-c0f1-4b58-9419-3f97299cb76c",
       "name": "Calculate Delta",
@@ -177,10 +177,10 @@
           "mappingMode": "defineBelow",
           "value": {
             "sessionId": "={{ $json.sessionId }}",
-            "lastHeartbeat": "={{ $json.lastHeartbeat }}",
-            "lastHeartbeatMs": "={{ $json.lastHeartbeatMs }}",
-            "accumulatedActiveMs": "={{ $json.accumulatedActiveMs }}",
-            "ttlAt": "={{ $json.ttlAt }}"
+            "lastHeartbeat": "={{ $json.newLastHeartbeat }}",
+            "lastHeartbeatMs": "={{ $json.newLastHeartbeatMs }}",
+            "accumulatedActiveMs": "={{ $json.newAccumulatedActiveMs }}",
+            "ttlAt": "={{ $json.newTtlAt }}"
           },
           "matchingColumns": [
             "sessionId"

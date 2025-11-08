@@ -359,3 +359,191 @@ Nếu bạn muốn mình làm tiếp phần nào *thực tế* ngay bây giờ:
 * C. Viết sample n8n workflow mapping sử dụng Google Sheets as session store?
 
 Chọn 1 trong A/B/C và mình sẽ làm tiếp chi tiết (code + file ready-to-import).
+
+---
+
+# 11) Floating Action Button (FAB) UI Feature
+
+## Overview
+Tính năng Floating Action Button (FAB) cung cấp giao diện người dùng trực quan để kết thúc phiên chấm điểm và báo cáo lỗi.
+
+## Components
+
+### A. FAB Button (Nút Tròn Chính)
+* **Vị trí**: Góc phải dưới màn hình (bottom: 30px, right: 30px)
+* **Thiết kế**: 
+  - Hình tròn (60px x 60px)
+  - Gradient màu tím (135deg, #667eea → #764ba2)
+  - Icon: ⚙️ (settings gear)
+  - Shadow: 0 4px 12px rgba(0,0,0,0.3)
+  - Hover effect: Scale 1.1 + shadow tăng
+* **Z-index**: 10000 (nổi trên iframe)
+
+### B. Hover Menu
+* **Trigger**: Hover vào FAB button
+* **Animation**: Fade in + translateY smooth transition
+* **Design**: 
+  - Background: white
+  - Border-radius: 12px
+  - Shadow: 0 4px 20px rgba(0,0,0,0.15)
+  - Xuất hiện phía trên FAB button
+* **Invisible Bridge**: Pseudo-element ::before tạo vùng hover vô hình (20px) giữa button và menu để tránh menu đóng khi di chuyển chuột
+
+### C. Menu Buttons
+
+#### 1. Nút "Hoàn Thành" (Complete Button)
+* **Vị trí**: Bên trái trong menu
+* **Màu**: Green (#4CAF50)
+* **Icon**: ✓
+* **Chức năng**:
+  - Click → hiển thị confirmation dialog
+  - Gọi API POST `/end` với payload:
+    ```json
+    {
+      "sessionId": "...",
+      "reason": "finished",
+      "ts": "2025-10-31T..."
+    }
+    ```
+  - Nếu thành công:
+    - Update session status = 'completed' trong localStorage
+    - Stop heartbeat timer (clearInterval)
+    - Disable button vĩnh viễn
+    - Thay đổi UI: text "✓ Đã hoàn thành", background #9e9e9e, cursor not-allowed
+    - Mark endSent = true
+  - Nếu thất bại: Enable lại button, cho phép retry
+* **State Persistence**:
+  - Check session.status === 'completed' khi page load
+  - Nếu đúng → tự động disable button với UI màu xám
+  - Giữ trạng thái qua reload pages
+
+#### 2. Nút "Báo lỗi" (Report Error Button)
+* **Vị trí**: Bên phải trong menu
+* **Màu**: Red (#ff5252)
+* **Icon**: ⚠
+* **Chức năng**: Mở modal báo cáo lỗi
+
+### D. Error Report Modal
+
+#### Modal Structure
+* **Overlay**: Full-screen dark background (rgba(0,0,0,0.5))
+* **Content**: 
+  - Max-width: 500px
+  - Background: white
+  - Border-radius: 12px
+  - Animation: Slide in from top
+
+#### Modal Elements
+1. **Header**: "Báo cáo lỗi"
+2. **Body**:
+   - Label: "Nguyên nhân gây ra lỗi:"
+   - Textarea: 
+     - Min-height: 120px
+     - Placeholder: "Vui lòng mô tả chi tiết lỗi gặp phải..."
+     - Border focus color: #667eea
+     - Resizable vertically
+3. **Footer**:
+   - Nút "Hủy" (Cancel): Close modal
+   - Nút "Gửi báo cáo" (Submit): Submit error report
+
+#### Error Report Flow
+1. User nhập mô tả lỗi vào textarea
+2. Click "Gửi báo cáo":
+   - Validate: textarea không empty
+   - Disable submit button, text "Đang gửi..."
+   - Tạo error report object:
+     ```json
+     {
+       "sessionId": "...",
+       "name": "...",
+       "docUrl": "...",
+       "reason": "user input here",
+       "timestamp": "2025-10-31T..."
+     }
+     ```
+   - Lưu vào localStorage với key `error_report_{timestamp}`
+   - Log to console
+   - Hiển thị success message
+   - Close modal
+3. **Keyboard shortcut**: Ctrl/Cmd + Enter để submit
+
+#### Modal Close Options
+- Click nút "Hủy"
+- Click vùng overlay bên ngoài modal
+- (Optional: ESC key - chưa implement)
+
+## Technical Implementation
+
+### CSS Features
+* Smooth transitions (0.3s ease)
+* Responsive design (width: 90% max on mobile)
+* Box-shadow layers for depth
+* Transform animations (scale, translateY, translateX)
+* Flexbox layout
+* @keyframes for modal slide-in animation
+
+### JavaScript Logic
+```javascript
+// Session status persistence
+if (session && session.status === 'completed') {
+  completeBtn.disabled = true;
+  completeBtn.textContent = '✓ Đã hoàn thành';
+  completeBtn.style.background = '#9e9e9e';
+}
+
+// Complete button handler
+async () => {
+  const res = await postJson(END_URL, payload);
+  if (res.ok) {
+    session.status = 'completed';
+    session.completedAt = Date.now();
+    localStorage.setItem(LS_KEY, JSON.stringify(session));
+    // Update UI and stop heartbeat
+  }
+}
+
+// Error report handler
+submitBtn.onclick = async () => {
+  const errorReport = { sessionId, name, docUrl, reason, timestamp };
+  localStorage.setItem(`error_report_${Date.now()}`, JSON.stringify(errorReport));
+  // Can extend to send to backend later
+}
+```
+
+## User Experience Flow
+
+### Happy Path - Complete Session
+1. User hover vào FAB → menu xuất hiện
+2. Click "Hoàn Thành" → confirmation dialog
+3. Confirm → API call `/end`
+4. Success → button disabled, text "Đã hoàn thành"
+5. Reload page → button vẫn disabled (persistent state)
+
+### Error Reporting Path
+1. User hover vào FAB → menu xuất hiện
+2. Click "Báo lỗi" → modal mở
+3. Nhập mô tả lỗi → click "Gửi báo cáo" hoặc Ctrl+Enter
+4. Success message → modal đóng
+5. Error report lưu trong localStorage
+
+### Edge Cases Handled
+* **Double-click prevention**: Disable button ngay khi click
+* **Network failure**: Cho phép retry nếu API fail
+* **Empty input**: Validate trước khi submit error report
+* **Reload persistence**: Session status được check và restore khi page load
+* **Hover stability**: Invisible bridge ngăn menu đóng khi di chuyển chuột
+
+## Future Enhancements
+* Send error reports to backend endpoint
+* Add ESC key to close modal
+* Add loading spinner during API calls
+* Add toast notifications thay vì alert()
+* Add analytics tracking cho button clicks
+* Thêm nút "Cancel" trong complete confirmation dialog
+
+## Design Philosophy
+* **Minimalist**: FAB không chiếm nhiều không gian
+* **Intuitive**: Hover để discover, click để action
+* **Persistent**: State được giữ qua reloads
+* **Forgiving**: Cho phép retry khi lỗi
+* **Accessible**: Clear visual feedback, confirmation dialogs

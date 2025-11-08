@@ -4,10 +4,316 @@
   <meta charset="utf-8">
   <title>Dũng English Speaking</title>
   <link rel="icon" type="image/png" href="https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_document_x16.png">
-  <style>html,body,iframe{margin:0;padding:0;width:100%;height:100%} iframe{border:none}</style>
+  <style>
+    html,body,iframe{margin:0;padding:0;width:100%;height:100%} 
+    iframe{border:none}
+    
+    /* Floating Action Button */
+    .fab-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 10000;
+    }
+    
+    .fab-button {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      font-size: 24px;
+      color: white;
+    }
+    
+    .fab-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    }
+    
+    /* Hover Menu */
+    .fab-menu {
+      position: absolute;
+      bottom: 65px;
+      right: 0;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      padding: 16px 12px;
+      min-width: 200px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+      transition-delay: 0s;
+      pointer-events: none;
+    }
+    
+    /* Create invisible bridge between FAB and menu */
+    .fab-menu::before {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 0;
+      right: 0;
+      height: 20px;
+      background: transparent;
+    }
+    
+    .fab-container:hover .fab-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+      transition-delay: 0s;
+    }
+    
+    /* Keep menu visible briefly when mouse leaves to allow movement */
+    .fab-menu:hover {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    
+    .fab-menu-button {
+      width: 100%;
+      padding: 12px 16px;
+      margin: 4px 0;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-complete {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .btn-complete:hover {
+      background: #45a049;
+      transform: translateX(-2px);
+    }
+    
+    .btn-next {
+      background: #2196F3;
+      color: white;
+    }
+    
+    .btn-next:hover {
+      background: #1976D2;
+      transform: translateX(-2px);
+    }
+    
+    .btn-report {
+      background: #ff5252;
+      color: white;
+    }
+    
+    .btn-report:hover {
+      background: #e04848;
+      transform: translateX(-2px);
+    }
+    
+    /* Error Report Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 10001;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .modal-header {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #333;
+    }
+    
+    .modal-body {
+      margin-bottom: 20px;
+    }
+    
+    .modal-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+    
+    .modal-select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+      background: white;
+      cursor: pointer;
+    }
+    
+    .modal-select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .modal-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    
+    .modal-textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .modal-footer {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    
+    .modal-button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-cancel {
+      background: #f5f5f5;
+      color: #666;
+    }
+    
+    .btn-cancel:hover {
+      background: #e0e0e0;
+    }
+    
+    .btn-submit {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-submit:hover {
+      background: #5568d3;
+    }
+    
+    .btn-submit:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
   <iframe id="docFrame"></iframe>
+
+  <!-- Floating Action Button -->
+  <div class="fab-container">
+    <button class="fab-button" title="Menu">
+      ⚙️
+    </button>
+    <div class="fab-menu">
+      <button class="fab-menu-button btn-complete" id="completeBtn">
+        ✓ Hoàn Thành
+      </button>
+      <button class="fab-menu-button btn-next" id="nextBtn">
+        → Tiếp theo
+      </button>
+      <button class="fab-menu-button btn-report" id="reportBtn">
+        ⚠ Báo lỗi
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Report Modal -->
+  <div class="modal-overlay" id="errorModal">
+    <div class="modal-content">
+      <div class="modal-header">Báo cáo lỗi</div>
+      <div class="modal-body">
+        <label class="modal-label" for="errorType">Loại lỗi:</label>
+        <select class="modal-select" id="errorType">
+          <option value="">-- Chọn loại lỗi --</option>
+          <option value="session_lost">Lỗi hệ thống - Session bị mất</option>
+          <option value="network_error">Lỗi mạng - Không gửi được heartbeat</option>
+          <option value="ui_lag">Giao diện lag/đơ</option>
+          <option value="doc_not_load">Google Doc không load được</option>
+          <option value="button_not_work">Nút Hoàn Thành không hoạt động</option>
+          <option value="other">Khác (vui lòng mô tả)</option>
+        </select>
+        
+        <label class="modal-label" for="errorDescription" style="margin-top: 16px;">
+          Mô tả chi tiết <span id="optionalLabel">(tuỳ chọn)</span>:
+        </label>
+        <textarea 
+          class="modal-textarea" 
+          id="errorDescription" 
+          placeholder="Mô tả thêm về lỗi nếu cần..."
+          style="min-height: 80px;"
+        ></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-button btn-cancel" id="cancelBtn">Hủy</button>
+        <button class="modal-button btn-submit" id="submitBtn">Gửi báo cáo</button>
+      </div>
+    </div>
+  </div>
 
 <script>
 (async function(){
@@ -230,20 +536,278 @@
     }
   });
 
-  // Optional: Add a "Finish Grading" button
-  // Uncomment this if you want an explicit finish button:
-  /*
-  const finishBtn = document.createElement('button');
-  finishBtn.textContent = 'Finish Grading';
-  finishBtn.style.cssText = 'position:fixed;top:10px;right:10px;z-index:9999;padding:10px 20px;background:#4CAF50;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;';
-  finishBtn.onclick = () => {
-    isIntentionalExit = true;
-    endSession('finished');
-    alert('Grading session completed!');
-    window.close(); // Try to close the window
-  };
-  document.body.appendChild(finishBtn);
-  */
+  // ===== Floating Action Button Logic =====
+  
+  // Check if session is already completed on page load
+  const completeBtn = document.getElementById('completeBtn');
+  if (session && session.status === 'completed') {
+    completeBtn.disabled = true;
+    completeBtn.textContent = '✓ Đã hoàn thành';
+    completeBtn.style.background = '#9e9e9e';
+    completeBtn.style.cursor = 'not-allowed';
+    console.log('Session already completed, button disabled');
+  }
+  
+  // Next Button Handler
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.addEventListener('click', async () => {
+    // Disable button to prevent double-click
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Đang tải...';
+    
+    try {
+      // Call /next-result API with name parameter
+      const response = await fetch(`${BACKEND}/next-result?name=${encodeURIComponent(name)}`);
+      
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Check if URL is provided in response
+      if (data.url) {
+        console.log('Redirecting to next result:', data.url);
+        // Mark as intentional exit before redirect
+        isIntentionalExit = true;
+        // End current session
+        endSession('next_result');
+        // Redirect to next URL
+        window.location.href = data.url;
+      } else {
+        throw new Error('No URL provided in response');
+      }
+    } catch (e) {
+      console.error('Failed to get next result:', e);
+      alert('Không thể tải bài tiếp theo. Vui lòng thử lại.');
+      nextBtn.disabled = false;
+      nextBtn.textContent = '→ Tiếp theo';
+    }
+  });
+
+  // Complete Button Handler
+  completeBtn.addEventListener('click', async () => {
+    if (confirm('Bạn có chắc chắn muốn hoàn thành phiên chấm điểm này không?')) {
+      // Disable button to prevent double-click
+      const completeBtn = document.getElementById('completeBtn');
+      completeBtn.disabled = true;
+      completeBtn.textContent = 'Đang xử lý...';
+      
+      try {
+        // Mark as intentional exit
+        isIntentionalExit = true;
+        
+        // Call /end API endpoint with proper fetch
+        if (session && session.sessionId) {
+          const payload = {
+            sessionId: session.sessionId,
+            reason: 'finished',
+            ts: new Date().toISOString()
+          };
+          
+          console.log('Calling /end API:', payload);
+          const res = await postJson(END_URL, payload);
+          
+          if (res.ok) {
+            console.log('Session ended successfully');
+            
+            // Update session status to completed in localStorage
+            session.status = 'completed';
+            session.completedAt = Date.now();
+            localStorage.setItem(LS_KEY, JSON.stringify(session));
+            
+            // Stop heartbeat
+            if (hbTimer) clearInterval(hbTimer);
+            endSent = true;
+            
+            // Keep button disabled and update text
+            completeBtn.textContent = '✓ Đã hoàn thành';
+            completeBtn.style.background = '#9e9e9e';
+            completeBtn.style.cursor = 'not-allowed';
+            
+            alert('Đã hoàn thành phiên chấm điểm!');
+          } else {
+            console.error('Failed to end session:', res);
+            alert('Có lỗi khi kết thúc phiên. Vui lòng thử lại.');
+            completeBtn.disabled = false;
+            completeBtn.textContent = '✓ Hoàn Thành';
+            isIntentionalExit = false;
+          }
+        } else {
+          alert('Không tìm thấy session để kết thúc.');
+          completeBtn.disabled = false;
+          completeBtn.textContent = '✓ Hoàn Thành';
+        }
+      } catch (e) {
+        console.error('Error completing session:', e);
+        alert('Có lỗi xảy ra. Vui lòng thử lại.');
+        completeBtn.disabled = false;
+        completeBtn.textContent = '✓ Hoàn Thành';
+        isIntentionalExit = false;
+      }
+    }
+  });
+
+  // Report Error Modal Logic
+  const modal = document.getElementById('errorModal');
+  const reportBtn = document.getElementById('reportBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const submitBtn = document.getElementById('submitBtn');
+  const errorType = document.getElementById('errorType');
+  const errorDescription = document.getElementById('errorDescription');
+  const optionalLabel = document.getElementById('optionalLabel');
+
+  // Error type labels mapping (will be populated from API)
+  let errorTypeLabels = {};
+  let errorReasonsLoaded = false;
+
+  // Fetch error reasons from API
+  async function loadErrorReasons() {
+    try {
+      const response = await fetch(BACKEND + '/error-reasons');
+      if (!response.ok) {
+        throw new Error('Failed to fetch error reasons');
+      }
+      
+      const data = await response.json();
+      
+      // Clear existing options except the first one
+      errorType.innerHTML = '<option value="">-- Chọn loại lỗi --</option>';
+      
+      // Populate dropdown with reasons from API
+      if (data.reasons && Array.isArray(data.reasons)) {
+        data.reasons.forEach(reason => {
+          const option = document.createElement('option');
+          option.value = reason.value || reason.label.toLowerCase().replace(/\s+/g, '_');
+          option.textContent = reason.label;
+          errorType.appendChild(option);
+          
+          // Store label mapping
+          errorTypeLabels[option.value] = reason.label;
+        });
+        errorReasonsLoaded = true;
+        console.log('Error reasons loaded from API:', data.reasons.length);
+      }
+    } catch (e) {
+      console.error('Failed to load error reasons:', e);
+      // Fallback to hardcoded options if API fails
+      errorType.innerHTML = `
+        <option value="">-- Chọn loại lỗi --</option>
+        <option value="session_lost">Lỗi hệ thống - Session bị mất</option>
+        <option value="network_error">Lỗi mạng - Không gửi được heartbeat</option>
+        <option value="ui_lag">Giao diện lag/đơ</option>
+        <option value="doc_not_load">Google Doc không load được</option>
+        <option value="button_not_work">Nút Hoàn Thành không hoạt động</option>
+        <option value="other">Khác (vui lòng mô tả)</option>
+      `;
+      errorTypeLabels = {
+        'session_lost': 'Lỗi hệ thống - Session bị mất',
+        'network_error': 'Lỗi mạng - Không gửi được heartbeat',
+        'ui_lag': 'Giao diện lag/đơ',
+        'doc_not_load': 'Google Doc không load được',
+        'button_not_work': 'Nút Hoàn Thành không hoạt động',
+        'other': 'Khác'
+      };
+      console.log('Using fallback error reasons');
+    }
+  }
+
+  // Load error reasons on page load
+  loadErrorReasons();
+
+  // Handle error type change - make description required if "other" selected
+  errorType.addEventListener('change', () => {
+    if (errorType.value === 'other') {
+      optionalLabel.textContent = '(bắt buộc)';
+      optionalLabel.style.color = '#ff5252';
+      errorDescription.setAttribute('required', 'required');
+    } else {
+      optionalLabel.textContent = '(tuỳ chọn)';
+      optionalLabel.style.color = '#666';
+      errorDescription.removeAttribute('required');
+    }
+  });
+
+  // Open modal
+  reportBtn.addEventListener('click', () => {
+    modal.classList.add('active');
+    errorType.value = '';
+    errorDescription.value = '';
+    optionalLabel.textContent = '(tuỳ chọn)';
+    optionalLabel.style.color = '#666';
+    errorDescription.removeAttribute('required');
+  });
+
+  // Close modal
+  cancelBtn.addEventListener('click', () => {
+    modal.classList.remove('active');
+  });
+
+  // Close modal when clicking outside
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.remove('active');
+    }
+  });
+
+  // Submit error report
+  submitBtn.addEventListener('click', async () => {
+    const selectedType = errorType.value;
+    const description = errorDescription.value.trim();
+    
+    // Validation
+    if (!selectedType) {
+      alert('Vui lòng chọn loại lỗi!');
+      return;
+    }
+    
+    if (selectedType === 'other' && !description) {
+      alert('Vui lòng mô tả chi tiết lỗi khi chọn "Khác"!');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang gửi...';
+
+    try {
+      // Store error report in localStorage
+      const errorReport = {
+        sessionId: session ? session.sessionId : 'no-session',
+        name: name,
+        docUrl: docUrl,
+        errorType: selectedType,
+        errorTypeLabel: errorTypeLabels[selectedType] || selectedType,
+        errorDescription: description || null,
+        timestamp: new Date().toISOString()
+      };
+
+      // Save to localStorage
+      const errorKey = `error_report_${Date.now()}`;
+      localStorage.setItem(errorKey, JSON.stringify(errorReport));
+
+      // Log to console for debugging
+      console.log('Error Report:', errorReport);
+
+      // Optional: Send to backend (you can add endpoint later)
+      // await postJson(BACKEND + '/error-report', errorReport);
+
+      alert('Đã gửi báo cáo lỗi thành công! Cảm ơn bạn đã phản hồi.');
+      modal.classList.remove('active');
+    } catch (e) {
+      console.error('Failed to submit error report:', e);
+      alert('Có lỗi xảy ra khi gửi báo cáo. Vui lòng thử lại.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Gửi báo cáo';
+    }
+  });
+
+  // Allow Enter key to submit (with Ctrl/Cmd) - only for description textarea
+  errorDescription.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      submitBtn.click();
+    }
+  });
 
 })();
 </script>

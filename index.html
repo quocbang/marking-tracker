@@ -326,6 +326,7 @@
   const START_URL = BACKEND + '/start';
   const HB_URL = BACKEND + '/heartbeat';
   const END_URL = BACKEND + '/end';
+  const ERROR_REPORT_URL = BACKEND + '/error-report';
 
   const iframe = document.getElementById('docFrame');
   iframe.src = docUrl;
@@ -804,7 +805,7 @@
       console.log('Error Report:', errorReport);
 
       // Optional: Send to backend (you can add endpoint later)
-      await postJson(BACKEND + '/error-report', errorReport);
+      await postJson(ERROR_REPORT_URL, errorReport);
 
       alert('Đã gửi báo cáo lỗi thành công! Cảm ơn bạn đã phản hồi.');
       modal.classList.remove('active');

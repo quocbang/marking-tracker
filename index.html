@@ -624,6 +624,17 @@
             if (hbTimer) clearInterval(hbTimer);
             endSent = true;
             
+            // Check if there's a nextLink in the response
+            if (res.data && res.data.nextLink) {
+              console.log('Redirecting to next link:', res.data.nextLink);
+              // Keep button disabled and update text
+              completeBtn.textContent = '✓ Đã hoàn thành - Chuyển tiếp...';
+              completeBtn.style.background = '#4CAF50';
+              // Redirect to next link
+              window.location.href = res.data.nextLink;
+              return; // Exit early to prevent further processing
+            }
+            
             // Keep button disabled and update text
             completeBtn.textContent = '✓ Đã hoàn thành';
             completeBtn.style.background = '#9e9e9e';

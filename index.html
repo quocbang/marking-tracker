@@ -500,7 +500,9 @@
     const payload = {
       sessionId: session.sessionId,
       reason,
-      ts: new Date().toISOString()
+      ts: new Date().toISOString(),
+      fullUrl: window.location.href,
+      name: name
     };
     
     // navigator.sendBeacon to increase chance of delivery on unload
@@ -602,7 +604,9 @@
           const payload = {
             sessionId: session.sessionId,
             reason: 'finished',
-            ts: new Date().toISOString()
+            ts: new Date().toISOString(),
+            fullUrl: window.location.href,
+            name: name
           };
           
           console.log('Calling /end API:', payload);

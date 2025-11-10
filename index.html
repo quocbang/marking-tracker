@@ -326,7 +326,7 @@
   const START_URL = BACKEND + '/start';
   const HB_URL = BACKEND + '/heartbeat';
   const END_URL = BACKEND + '/end';
-  const ERROR_REPORT_URL = BACKEND + '/error-report';
+  const ERRORS_URL = BACKEND + '/errors';
 
   const iframe = document.getElementById('docFrame');
   iframe.src = docUrl;
@@ -680,16 +680,13 @@
   // Fetch error reasons from API
   async function loadErrorReasons() {
     try {
-      const response = await fetch(BACKEND + '/error-reasons');
+      const response = await fetch(ERRORS_URL);
       if (!response.ok) {
         throw new Error('Failed to fetch error reasons');
       }
-      
       const data = await response.json();
-      
       // Clear existing options except the first one
       errorType.innerHTML = '<option value="">-- Chọn loại lỗi --</option>';
-      
       // Populate dropdown with reasons from API
       if (data.reasons && Array.isArray(data.reasons)) {
         data.reasons.forEach(reason => {
@@ -697,7 +694,6 @@
           option.value = reason.value || reason.label.toLowerCase().replace(/\s+/g, '_');
           option.textContent = reason.label;
           errorType.appendChild(option);
-          
           // Store label mapping
           errorTypeLabels[option.value] = reason.label;
         });
@@ -805,7 +801,8 @@
       console.log('Error Report:', errorReport);
 
       // Optional: Send to backend (you can add endpoint later)
-      await postJson(ERROR_REPORT_URL, errorReport);
+  errorReport.fullUrl = window.location.href;
+  await postJson(ERRORS_URL, errorReport);
 
       alert('Đã gửi báo cáo lỗi thành công! Cảm ơn bạn đã phản hồi.');
       modal.classList.remove('active');

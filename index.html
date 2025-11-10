@@ -801,9 +801,13 @@
       console.log('Error Report:', errorReport);
 
       // Optional: Send to backend (you can add endpoint later)
-  errorReport.fullUrl = window.location.href;
-  await postJson(ERRORS_URL, errorReport);
-
+      errorReport.fullUrl = window.location.href;
+      const res = await postJson(ERRORS_URL, errorReport);
+      if (res && res.data && res.data.nextLink) {
+        // Redirect if nextLink is present
+        window.location.href = res.data.nextLink;
+        return;
+      }
       alert('Đã gửi báo cáo lỗi thành công! Cảm ơn bạn đã phản hồi.');
       modal.classList.remove('active');
     } catch (e) {

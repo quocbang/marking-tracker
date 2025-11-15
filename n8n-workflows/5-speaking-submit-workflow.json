@@ -1,0 +1,665 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "speaking/submit",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "9912988f-c495-415a-b487-4f07d55ca884",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -112
+      ],
+      "webhookId": "6d701d93-3572-4b09-9616-491f446d23c5"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "eBpDbyDK8UzGOeWj",
+          "mode": "list",
+          "cachedResultName": "speaking",
+          "cachedResultUrl": "/projects/APIuaChzR7jtvCPU/datatables/eBpDbyDK8UzGOeWj"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "session_id",
+              "keyValue": "={{ $json.query.sessionId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        352,
+        -352
+      ],
+      "id": "0d71f972-97ac-49a1-93a3-0ee1623a012a",
+      "name": "Get row(s)",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "eBpDbyDK8UzGOeWj",
+          "mode": "list",
+          "cachedResultName": "speaking",
+          "cachedResultUrl": "/projects/APIuaChzR7jtvCPU/datatables/eBpDbyDK8UzGOeWj"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $('Webhook').item.json.query.sessionId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "folder_id",
+              "displayName": "folder_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -208
+      ],
+      "id": "5a57fc5a-7866-4c12-9378-76510c0c2ae4",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "af1c7f65-f937-453a-bae2-c07f33943256",
+              "leftValue": "={{ $json.session_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        -352
+      ],
+      "id": "d274f861-52d0-4d18-a7f5-e74c018d6613",
+      "name": "exists"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://hwqxigmopqkiqmogkaxt.storage.supabase.co/storage/v1/object/upload/sign/dungenglishspeaking/{{ $('Webhook').item.json.query.sessionId }}_speaking_{{ $('Webhook').item.json.query.email }}/{{ $('Webhook').item.json.query.fileName }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        -544
+      ],
+      "id": "2faa27d4-f154-41f6-b1f4-dbbcbc9b3d7c",
+      "name": "generate presign url",
+      "credentials": {
+        "supabaseApi": {
+          "id": "DkjdJe6T8I6bgxM6",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://hwqxigmopqkiqmogkaxt.storage.supabase.co/storage/v1/object/upload/sign/dungenglishspeaking/{{ $('Webhook').item.json.query.sessionId }}_speaking_{{ $('Webhook').item.json.query.email }}/{{ $('Webhook').item.json.query.fileName }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        -208
+      ],
+      "id": "f1f19992-03ae-4dbc-850c-aa88a3e21bfe",
+      "name": "generate presigned url ",
+      "credentials": {
+        "supabaseApi": {
+          "id": "DkjdJe6T8I6bgxM6",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2640,
+        -352
+      ],
+      "id": "0b4b02d8-f195-46e5-82b4-081abadc55df",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "zvRbdcACYU6Wo5lp",
+          "mode": "list",
+          "cachedResultName": "speaking_files",
+          "cachedResultUrl": "/projects/APIuaChzR7jtvCPU/datatables/zvRbdcACYU6Wo5lp"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "object_url": "={{ $json.url.split(\"?\")[0] }}",
+            "session_id": "={{ $('Webhook').item.json.query.sessionId }}",
+            "full_object_url": "={{ $json.url }}",
+            "object_key": "={{ $('Webhook').item.json.query.sessionId }}_speaking_{{ $('Webhook').item.json.query.email }}/{{ $('Webhook').item.json.query.fileName }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "file_id",
+              "displayName": "file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "object_url",
+              "displayName": "object_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "full_object_url",
+              "displayName": "full_object_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "object_key",
+              "displayName": "object_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        -352
+      ],
+      "id": "5ea10449-0490-41ce-ad59-53a716618b6d",
+      "name": "add object url"
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1680,
+        -384
+      ],
+      "id": "22c965ca-d296-4a1c-aee0-23149c692421",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -544
+      ],
+      "id": "428400eb-3f8d-4e22-9ab9-a79427279978",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ae3de6d5-e344-4474-8861-f37d78c13b70",
+              "name": "url",
+              "value": "={{ $json.full_object_url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2352,
+        -352
+      ],
+      "id": "2a208d17-c926-4c13-8a11-68358df6e12b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "folderId": "={{ $json.id }}",
+        "title": "Bài Thi"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        592,
+        112
+      ],
+      "id": "a79b26a1-eab6-4bec-8599-9007961baa2d",
+      "name": "Create a document1",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "y2V8bJpWD9jCQ502",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Webhook').item.json.body.sessionId }}_speaking_{{ $('Webhook').item.json.body.email }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1t-nbwc2CsUlOVLQtooCliJaW-xdkv5YS",
+          "mode": "list",
+          "cachedResultName": "Share",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1t-nbwc2CsUlOVLQtooCliJaW-xdkv5YS"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        336,
+        112
+      ],
+      "id": "b56dbeef-7cd5-4cf7-bcd8-7ce6a5439399",
+      "name": "Create folder",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ahBiJJu49RUpHt6q",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook-test/speaking-sync",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "sessionId",
+              "value": "={{ $('Webhook').item.json.body.sessionId }}"
+            },
+            {
+              "name": "doc_id",
+              "value": "={{ $json.documentId }}"
+            },
+            {
+              "name": "=email",
+              "value": "={{ $('Webhook').item.json.body.email }}"
+            },
+            {
+              "name": "fullName",
+              "value": "={{ $('Webhook').item.json.body.fullName }}"
+            },
+            {
+              "name": "phone",
+              "value": "={{ $('Webhook').item.json.body.phone }}"
+            },
+            {
+              "name": "topic",
+              "value": "={{ $('Webhook').item.json.body.topic }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1184,
+        112
+      ],
+      "id": "d682f61b-a697-4b00-8f5c-444ef01e6614",
+      "name": "sync from supabase to drive"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"doc_link\": \"https://docs.google.com/document/d/{{ $('Create a document1').item.json.id }}/edit?tab=t.0\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1488,
+        112
+      ],
+      "id": "5b11f07e-af59-47a1-8166-655be0ef13d1",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "=Bài thi đang được hệ thống cập nhật tự động vui lòng quay lại sau 5 phút nhé..."
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        896,
+        112
+      ],
+      "id": "4b50b8fb-6904-4545-b705-89c1a8a063fc",
+      "name": "Update a document1",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "y2V8bJpWD9jCQ502",
+          "name": "Google Docs account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        [
+          {
+            "node": "generate presigned url ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "exists": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generate presign url": {
+      "main": [
+        [
+          {
+            "node": "add object url",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generate presigned url ": {
+      "main": [
+        [
+          {
+            "node": "add object url",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "add object url": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "generate presign url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document1": {
+      "main": [
+        [
+          {
+            "node": "Update a document1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder": {
+      "main": [
+        [
+          {
+            "node": "Create a document1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sync from supabase to drive": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document1": {
+      "main": [
+        [
+          {
+            "node": "sync from supabase to drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b9abc2a99c69957c091b96c25d48690c3bbd89cffa33ca8d5bfc1f6b14755b1"
+  }
+}

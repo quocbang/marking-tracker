@@ -12,8 +12,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
       "position": [
-        -1220,
-        100
+        -1216,
+        112
       ],
       "webhookId": "end-session"
     },
@@ -50,6 +50,24 @@
               "name": "endTime",
               "value": "={{ $now.toISO() }}",
               "type": "string"
+            },
+            {
+              "id": "7041073e-7cfc-4148-98a5-577fab404b58",
+              "name": "fullUrl",
+              "value": "={{ $jmespath($json, 'body.fullUrl') }}",
+              "type": "string"
+            },
+            {
+              "id": "2fbd857b-75be-494c-ad38-752a76938484",
+              "name": "name",
+              "value": "={{ $jmespath($json, 'body.name') }}",
+              "type": "string"
+            },
+            {
+              "id": "0a513930-d97d-4994-ae49-5a7698b918fe",
+              "name": "type",
+              "value": "={{ $jmespath($json, 'body.type') }}",
+              "type": "string"
             }
           ]
         },
@@ -60,8 +78,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -900,
-        100
+        -896,
+        112
       ]
     },
     {
@@ -95,8 +113,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        -680,
-        260
+        -1008,
+        560
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -144,21 +162,21 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        20,
-        100
+        32,
+        112
       ]
     },
     {
       "parameters": {
         "language": "python",
-        "pythonCode": "# Loop over input items and add a new field called 'myNewField' to the JSON of each one\n# Calculate final active duration (Python version)\n\ndef calculate_final_activity(item):\n    endTimeMs = item.get('endTimeMs')\n    lastHeartbeatMs = item.get('lastHeartbeatMs')\n    accumulatedActiveMs = item.get('accumulatedActiveMs', 0)\n    startTimeMs = item.get('startTimeMs')\n\n    # Calculate final delta (time between last heartbeat and end)\n    finalDeltaMs = endTimeMs - lastHeartbeatMs if endTimeMs and lastHeartbeatMs else 0\n\n    # If final delta is small (< 30 seconds), add it to accumulated time\n    finalAccumulatedActiveMs = accumulatedActiveMs\n    if 0 < finalDeltaMs < 30000:\n        finalAccumulatedActiveMs += finalDeltaMs\n\n    # Convert to seconds\n    activeSec = round(finalAccumulatedActiveMs / 1000)\n\n    # Sanity checks\n    maxDurationSec = 43200  # 12 hours\n    finalActiveSec = min(activeSec, maxDurationSec)\n\n    # Calculate total elapsed time\n    totalElapsedSec = round((endTimeMs - startTimeMs) / 1000) if endTimeMs and startTimeMs else 0\n\n    # Calculate activity percentage\n    activityPercentage = round((finalActiveSec / totalElapsedSec) * 100) if totalElapsedSec > 0 else 0\n\n    # Calculate active minutes (rounded to 1 decimal)\n    activeMinutes = round(finalActiveSec / 60 * 10) / 10\n\n    # Return updated dict\n    return {\n        **item,\n        'finalDeltaMs': finalDeltaMs,\n        'finalAccumulatedActiveMs': finalAccumulatedActiveMs,\n        'activeSec': finalActiveSec,\n        'totalElapsedSec': totalElapsedSec,\n        'activityPercentage': activityPercentage,\n        'activeMinutes': activeMinutes\n    }\n\nfor item in _input.all():\n  return calculate_final_activity(item.json)\nreturn _input.all()"
+        "pythonCode": "def to_int(value, default=0):\n    try:\n        return int(value)\n    except (TypeError, ValueError):\n        return default\n\ndef calculate_final_activity(item):\n    endTimeMs = to_int(item.get('endTimeMs'))\n    lastHeartbeatMs = to_int(item.get('lastHeartbeatMs'))\n    accumulatedActiveMs = to_int(item.get('accumulatedActiveMs'))\n    startTimeMs = to_int(item.get('startTimeMs'))\n\n    # Calculate final delta (time between last heartbeat and end)\n    finalDeltaMs = endTimeMs - lastHeartbeatMs if endTimeMs and lastHeartbeatMs else 0\n\n    # If final delta is small (< 30 seconds), add it to accumulated time\n    finalAccumulatedActiveMs = accumulatedActiveMs\n    if 0 < finalDeltaMs < 30000:\n        finalAccumulatedActiveMs += finalDeltaMs\n\n    # Convert to seconds\n    activeSec = round(finalAccumulatedActiveMs / 1000)\n\n    # Sanity checks\n    maxDurationSec = 43200  # 12 hours\n    finalActiveSec = min(activeSec, maxDurationSec)\n\n    # Calculate total elapsed time\n    totalElapsedSec = round((endTimeMs - startTimeMs) / 1000) if endTimeMs and startTimeMs else 0\n\n    # Calculate activity percentage\n    activityPercentage = round((finalActiveSec / totalElapsedSec) * 100) if totalElapsedSec > 0 else 0\n\n    # Calculate active minutes (rounded to 1 decimal)\n    activeMinutes = round(finalActiveSec / 60 * 10) / 10\n\n    # Return updated dict\n    return {\n        **item,\n        'finalDeltaMs': finalDeltaMs,\n        'finalAccumulatedActiveMs': finalAccumulatedActiveMs,\n        'activeSec': finalActiveSec,\n        'totalElapsedSec': totalElapsedSec,\n        'activityPercentage': activityPercentage,\n        'activeMinutes': activeMinutes\n    }\n\n# Apply for all items\noutput = []\nfor item in _input.all():\n    output.append(calculate_final_activity(item.json))\n\nreturn output\n"
       },
       "id": "8cb20881-776a-4621-97c0-ab6023f14cd0",
       "name": "Calculate Final Duration",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        220,
+        224,
         0
       ]
     },
@@ -402,8 +420,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        420,
-        0
+        432,
+        -336
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -441,7 +459,9 @@
             "activeMinutes": "={{ $json.activeMinutes }}",
             "totalElapsedSec": "={{ $json.totalElapsedSec }}",
             "activityPercentage": "={{ $json.activityPercentage }}",
-            "reason": "={{ $json.reason }}"
+            "reason": "={{ $json.reason }}",
+            "endDate": "={{ $json.endTime.format(\"yyyy-mm-dd\") }}",
+            "type": "={{ $json.type }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -491,6 +511,16 @@
               "canBeUsedToMatch": true
             },
             {
+              "id": "endDate",
+              "displayName": "endDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
               "id": "activeSec",
               "displayName": "activeSec",
               "required": false,
@@ -534,6 +564,16 @@
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -546,7 +586,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        620,
+        672,
         0
       ],
       "credentials": {
@@ -559,7 +599,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { \"status\": \"ok\", \"sessionId\": $json.sessionId, \"activeSec\": $json.activeSec, \"activeMinutes\": $json.activeMinutes, \"activityPercentage\": $json.activityPercentage } }}",
+        "responseBody": "={{ {\n    \"status\": \"ok\",\n    \"sessionId\": $json.sessionId,\n    \"activeSec\": $json.activeSec,\n    \"activeMinutes\": $json.activeMinutes,\n    \"activityPercentage\": $json.activityPercentage,\n    \"nextLink\": $json.Link\n} }}",
         "options": {
           "responseHeaders": {
             "entries": [
@@ -584,8 +624,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        820,
-        0
+        1904,
+        576
       ]
     },
     {
@@ -608,8 +648,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        220,
-        200
+        224,
+        208
       ]
     },
     {
@@ -621,8 +661,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.1,
       "position": [
-        -260,
-        120
+        -256,
+        128
       ],
       "id": "e0186839-74d2-4397-9553-53a1926f5af7",
       "name": "Merge"
@@ -637,11 +677,536 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -460,
-        260
+        -464,
+        272
       ],
       "id": "c3b89726-5a0c-492b-a15d-93a0028ec806",
       "name": "except fields"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "jCLJwqOBit1WTfTW",
+          "mode": "list",
+          "cachedResultName": "tracker_log_sessions",
+          "cachedResultUrl": "/projects/APIuaChzR7jtvCPU/datatables/jCLJwqOBit1WTfTW"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "sessionId",
+              "keyValue": "={{ $json.sessionId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        272
+      ],
+      "id": "1a5c434e-600d-48f0-8e5d-b85a258ee8f9",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "jCLJwqOBit1WTfTW",
+          "mode": "list",
+          "cachedResultName": "tracker_log_sessions",
+          "cachedResultUrl": "/projects/APIuaChzR7jtvCPU/datatables/jCLJwqOBit1WTfTW"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "sessionId",
+              "keyValue": "={{ $json.sessionId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $json.name }}",
+            "docUrl": "={{ $json.docUrl }}",
+            "accumulatedActiveMs": "={{ $json.accumulatedActiveMs }}",
+            "used": "TRUE",
+            "type": "={{ $json.type }}",
+            "endTime": "={{ $json.endTime }}",
+            "endTimeMs": "={{ $json.endTimeMs }}",
+            "activeSec": "={{ $json.activeSec }}",
+            "activeMinutes": "={{ $json.activeMinutes }}",
+            "totalElapsedSec": "={{ $json.totalElapsedSec }}",
+            "reason": "={{ $json.reason }}",
+            "activityPercentage": "={{ $json.activityPercentage }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "docUrl",
+              "displayName": "docUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "startTime",
+              "displayName": "startTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "startTimeMs",
+              "displayName": "startTimeMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "lastHeartbeat",
+              "displayName": "lastHeartbeat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "lastHeartbeatMs",
+              "displayName": "lastHeartbeatMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "accumulatedActiveMs",
+              "displayName": "accumulatedActiveMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "used",
+              "displayName": "used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ttlAt",
+              "displayName": "ttlAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "endTimeMs",
+              "displayName": "endTimeMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "activeSec",
+              "displayName": "activeSec",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "activeMinutes",
+              "displayName": "activeMinutes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "totalElapsedSec",
+              "displayName": "totalElapsedSec",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "activityPercentage",
+              "displayName": "activityPercentage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "finalAccumulatedActiveMs",
+              "displayName": "finalAccumulatedActiveMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        432,
+        0
+      ],
+      "id": "f8939fef-0224-44a8-b28c-fce7aaa0ee20",
+      "name": "Update row(s)"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU",
+          "mode": "list",
+          "cachedResultName": "Chấm Điểm",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "grading",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Link": "={{ $('Extract End Data').item.json.fullUrl }}",
+            "Trạng Thái": "Đã chữa"
+          },
+          "matchingColumns": [
+            "Link"
+          ],
+          "schema": [
+            {
+              "id": "Trạng Thái",
+              "displayName": "Trạng Thái",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nguyên Nhân",
+              "displayName": "Nguyên Nhân",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Tên",
+              "displayName": "Tên",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "77b661da-a6cc-44af-ae0f-095351fae847",
+      "name": "Update Status to Completed",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        432,
+        208
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "umrAZGShoRxgB742",
+          "name": "bangquoc9-sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU",
+          "mode": "list",
+          "cachedResultName": "Chấm Điểm",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "grading",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Trạng Thái"
+            },
+            {
+              "lookupColumn": "Tên",
+              "lookupValue": "={{ $json.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -688,
+        576
+      ],
+      "id": "6ad1a1a7-e3b5-4832-a6e0-752d106f4ae0",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "umrAZGShoRxgB742",
+          "name": "bangquoc9-sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1488,
+        576
+      ],
+      "id": "34628280-eaea-438f-a074-60c6a15021a5",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU",
+          "mode": "list",
+          "cachedResultName": "Chấm Điểm",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "grading",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Link",
+              "lookupValue": "={{ $('Extract End Data').item.json.fullUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        640,
+        208
+      ],
+      "id": "18dd8952-51b2-48f8-9508-c4b8d32f3e4a",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "umrAZGShoRxgB742",
+          "name": "bangquoc9-sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/send-email",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "is_error",
+              "value": "false"
+            },
+            {
+              "name": "type",
+              "value": "={{ $('Extract End Data').item.json.type }}"
+            },
+            {
+              "name": "fullUrl",
+              "value": "={{ $('Extract End Data').item.json.fullUrl }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json[\"Địa chỉ email\"] }}"
+            },
+            {
+              "name": "fullName",
+              "value": "={{ $json[\"Họ và tên\"] }}"
+            },
+            {
+              "name": "topic",
+              "value": "={{ $json[\"Chủ đề\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        848,
+        208
+      ],
+      "id": "6602e401-d8f7-4c64-9948-eaeaaa388e97",
+      "name": "send email async"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1168,
+        128
+      ],
+      "id": "8ae5a26b-bb9a-4f0c-97e5-8f71a9abc030",
+      "name": "Merge2"
     }
   ],
   "connections": {
@@ -665,7 +1230,12 @@
             "index": 0
           },
           {
-            "node": "Lookup Session",
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get row(s) in sheet",
             "type": "main",
             "index": 0
           }
@@ -674,13 +1244,7 @@
     },
     "Lookup Session": {
       "main": [
-        [
-          {
-            "node": "except fields",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Check Session Valid": {
@@ -705,7 +1269,12 @@
       "main": [
         [
           {
-            "node": "Mark Session Used",
+            "node": "Update row(s)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Status to Completed",
             "type": "main",
             "index": 0
           }
@@ -714,20 +1283,14 @@
     },
     "Mark Session Used": {
       "main": [
-        [
-          {
-            "node": "Append to Completed Sheet",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Append to Completed Sheet": {
       "main": [
         [
           {
-            "node": "Respond End OK",
+            "node": "Merge2",
             "type": "main",
             "index": 0
           }
@@ -752,6 +1315,94 @@
             "node": "Merge",
             "type": "main",
             "index": 1
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "except fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row(s)": {
+      "main": [
+        [
+          {
+            "node": "Append to Completed Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status to Completed": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Respond End OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "send email async",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send email async": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
           }
         ]
       ]

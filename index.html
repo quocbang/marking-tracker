@@ -320,7 +320,9 @@
   const params = new URLSearchParams(window.location.search);
   const name = params.get('name') || 'unknown';
   const docUrl = params.get('doc');
-  if(!docUrl) { document.body.innerHTML = '<h3>Missing ?doc= param</h3>'; return; }
+  const speaking = params.get('speaking');
+  const type = docUrl ? 'writing' : speaking ? 'speaking' : null;
+  if(!docUrl && !speaking) { document.body.innerHTML = '<h3>Missing ?doc= or ?speaking= param</h3>'; return; }
 
   const BACKEND = 'https://n8n-mac.quocbangdev.asia/webhook/marking-log';
   const START_URL = BACKEND + '/start';
@@ -329,20 +331,29 @@
   const ERRORS_URL = BACKEND + '/errors';
 
   const iframe = document.getElementById('docFrame');
-  iframe.src = docUrl;
+  if (docUrl) {
+    iframe.src = docUrl;
+  }
 
   // Extract document ID from URL to create document-specific localStorage key
   // This ensures each document has its own session, allowing teachers to grade multiple documents
   const docId = (() => {
-    try {
-      const url = new URL(docUrl);
-      // Extract doc ID from Google Docs URL (e.g., /document/d/DOC_ID/edit)
-      const pathParts = url.pathname.split('/');
-      const dIndex = pathParts.indexOf('d');
-      return dIndex >= 0 && pathParts[dIndex + 1] ? pathParts[dIndex + 1] : 'unknown';
-    } catch(e) {
-      // Fallback: use simple hash of docUrl
-      return btoa(docUrl).slice(0, 16).replace(/[^a-zA-Z0-9]/g, '');
+    if (docUrl) {
+      try {
+        const url = new URL(docUrl);
+        // Extract doc ID from Google Docs URL (e.g., /document/d/DOC_ID/edit)
+        const pathParts = url.pathname.split('/');
+        const dIndex = pathParts.indexOf('d');
+        return dIndex >= 0 && pathParts[dIndex + 1] ? pathParts[dIndex + 1] : 'unknown';
+      } catch(e) {
+        // Fallback: use simple hash of docUrl
+        return btoa(docUrl).slice(0, 16).replace(/[^a-zA-Z0-9]/g, '');
+      }
+    } else if (speaking) {
+      // For speaking mode, use speaking param as identifier
+      return 'speaking_' + speaking.replace(/[^a-zA-Z0-9]/g, '_');
+    } else {
+      return 'unknown';
     }
   })();
   const LS_KEY = `grading_session_${docId}`;
@@ -389,7 +400,7 @@
     
     // Create new session - retry until successful
     console.log(forceNew ? 'Creating new session (forced)...' : 'Creating new session...');
-    const payload = { name, docUrl };
+    const payload = { name, docUrl, type };
     
     let attempts = 0;
     const maxAttempts = 10;
@@ -503,7 +514,8 @@
       reason,
       ts: new Date().toISOString(),
       fullUrl: window.location.href,
-      name: name
+      name: name,
+      type: type
     };
     
     // navigator.sendBeacon to increase chance of delivery on unload
@@ -607,7 +619,8 @@
             reason: 'finished',
             ts: new Date().toISOString(),
             fullUrl: window.location.href,
-            name: name
+            name: name,
+            type: type
           };
           
           console.log('Calling /end API:', payload);
@@ -787,6 +800,7 @@
         sessionId: session ? session.sessionId : 'no-session',
         name: name,
         docUrl: docUrl,
+        type: type,
         errorType: selectedType,
         errorTypeLabel: errorTypeLabels[selectedType] || selectedType,
         errorDescription: description || null,

@@ -1,0 +1,152 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/send-email",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        0
+      ],
+      "id": "518d2bd1-6388-46d9-b389-6fc6b492c1e7",
+      "name": "Webhook",
+      "webhookId": "01fe3d7b-17ed-46d7-b184-41bcd07db316"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "956edbcc-5d45-4743-b73e-705612fceab4",
+              "leftValue": "={{ $json.body.is_error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        144,
+        0
+      ],
+      "id": "04ae77b8-3694-44fe-a8f0-fb8935afcd5c",
+      "name": "is success"
+    },
+    {
+      "parameters": {
+        "sendTo": "bangquoc9@gmail.com",
+        "subject": "=Phản hồi {{ $json.body.type == \"speaking\" ? \"bài nói\" : \"bài viết\" }} - Dung English Speaking",
+        "message": "=<!DOCTYPE html>\n<html lang=\"vi\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Phản hồi {{ $json.body.type == \"speaking\" ? \"bài nói\" : \"bài viết\" }} - Dung English Speaking</title>\n</head>\n<body style=\"margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;\">\n    <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color: #f5f5f5;\">\n        <tr>\n            <td align=\"center\" style=\"padding: 40px 20px;\">\n                <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);\">\n                    <!-- Header -->\n                    <tr>\n                        <td style=\"padding: 40px 40px 30px 40px;\">\n                            <h1 style=\"margin: 0; font-size: 24px; color: #333333; font-weight: bold;\">\n                                Phản hồi {{ $json.body.type == \"speaking\" ? \"bài nói\" : \"bài viết\" }}_ Dung English Speaking\n                            </h1>\n                        </td>\n                    </tr>\n                    \n                    <!-- Content -->\n                    <tr>\n                        <td style=\"padding: 0 40px 30px 40px;\">\n                            <p style=\"margin: 0 0 20px 0; font-size: 16px; color: #333333; line-height: 1.6;\">\n                                Chào {{ $json.body.fullName }},\n                            </p>\n                            \n                            <p style=\"margin: 0 0 20px 0; font-size: 16px; color: #333333; line-height: 1.6;\">\n                                Chủ đề: {{ $json.body.topic }},\n                            </p>\n                            \n                            <p style=\"margin: 0 0 20px 0; font-size: 16px; color: #333333; line-height: 1.6;\">\n                                Link {{ $json.body.type == \"speaking\" ? \"bài nói\" : \"bài viết\" }} đã nộp: <a href=\"{{ $json.body.fullUrl.match(/doc=([^&]+)/)?.[1] ?? $json.body.fullUrl.match(/speaking=([^&]+)/)?.[1] }}\" style=\"color: #4A90E2; text-decoration: none;\">tại đây</a>\n                            </p>\n                            \n                            <p style=\"margin: 0 0 30px 0; font-size: 16px; color: #333333; line-height: 1.6;\">\n                                {{ $json.body.type == \"speaking\" ? \"Bài nói\" : \"Bài viết\" }} tuần vừa rồi của em gặp phải lỗi <strong>{{ $json.body.error_message }}</strong>, em đọc lại hướng dẫn chi tiết để sửa lại cho đúng nhé.\n                            </p>\n                            \n                            <!-- Button -->\n                            <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n                                <tr>\n                                    <td align=\"center\" style=\"padding: 20px 0;\">\n                                        <a href=\"#\" style=\"display: inline-block; padding: 16px 40px; background-color: #5FB5A0; color: #ffffff; text-decoration: none; border-radius: 50px; font-size: 18px; font-weight: 500;\">\n                                            Hướng dẫn nộp bài chi tiết\n                                        </a>\n                                    </td>\n                                </tr>\n                            </table>\n                            \n                            <p style=\"margin: 30px 0 0 0; font-size: 16px; color: #333333; line-height: 1.6;\">\n                                Sau khi sửa bài xong, em nộp lại bài qua form này để anh chữa lại nhé: <a href=\"https://submit.quocbangdev.asia\" style=\"color: #4A90E2; text-decoration: none;\">Form nộp bài</a>\n                            </p>\n                            \n                            <p style=\"margin: 20px 0 0 0; font-size: 16px; color: #333333; line-height: 1.6;\">\n                                Chúc em ôn tập tốt!\n                            </p>\n                        </td>\n                    </tr>\n                    \n                    <!-- Divider -->\n                    <tr>\n                        <td style=\"padding: 0 40px;\">\n                            <div style=\"border-top: 2px dashed #cccccc; margin: 30px 0;\"></div>\n                        </td>\n                    </tr>\n                    \n                    <!-- Footer -->\n                    <tr>\n                        <td style=\"padding: 30px 40px 40px 40px; text-align: center;\">\n                            <p style=\"margin: 0 0 10px 0; font-size: 18px; color: #333333; font-weight: 600;\">\n                                Mr. Hoàng Tiến Dũng\n                            </p>\n                            <p style=\"margin: 0; font-size: 16px; color: #666666;\">\n                                Giáo viên Tiếng Anh tại Dũng English Speaking\n                            </p>\n                        </td>\n                    </tr>\n                </table>\n            </td>\n        </tr>\n    </table>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        144
+      ],
+      "id": "a179f8e0-4385-41c1-9831-003848f9ea67",
+      "name": "Send error",
+      "webhookId": "0074e375-066f-4b59-96a5-87187006449b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4tHKqfwCKAekX23J",
+          "name": "Dragon Review"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "bangquoc9@gmail.com",
+        "subject": "=Phản hồi {{ $json.body.type == \"speaking\" ? \"bài nói\" : \"bài viết\" }} - Dung English Speaking",
+        "message": "=<!DOCTYPE html>\n<html lang=\"vi\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Phản hồi {{ $json.body.type == \"speaking\" ? \"bài nói\" : \"bài viết\" }} - Dung English Speaking</title>\n</head>\n<body style=\"margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;\">\n    <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color: #f5f5f5;\">\n        <tr>\n            <td align=\"center\" style=\"padding: 40px 20px;\">\n                <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);\">\n                    <!-- Header -->\n                    <tr>\n                        <td style=\"padding: 40px 40px 30px 40px;\">\n                            <h1 style=\"margin: 0; font-size: 24px; color: #333333; font-weight: bold;\">\n                                Phản hồi {{ $json.body.type == \"speaking\" ? \"bài \" : \"bài viết\" }}_ Dung English Speaking\n                            </h1>\n                        </td>\n                    </tr>\n                    \n                    <!-- Content -->\n                    <tr>\n                        <td style=\"padding: 0 40px 30px 40px;\">\n                            <p style=\"margin: 0 0 20px 0; font-size: 16px; color: #333333; line-height: 1.6;\">\n                                Chào {{ $json.body.fullName }},\n                            </p>\n                            \n                            <p style=\"margin: 0 0 20px 0; font-size: 16px; color: #333333; line-height: 1.6;\">\n                                Chủ đề: {{ $json.body.topic }},\n                            </p>\n                            \n                            <p style=\"margin: 0 0 20px 0; font-size: 16px; color: #333333; line-height: 1.6;\">\n                                Link {{ $json.body.type == \"speaking\" ? \"bài nói\" : \"bài viết\" }} đã nộp: <a href=\"{{ $json.body.fullUrl.match(/doc=([^&]+)/)?.[1] ?? $json.body.fullUrl.match(/speaking=([^&]+)/)?.[1] }}\" style=\"color: #4A90E2; text-decoration: none;\">tại đây</a>\n                            </p>\n                            \n                            <p style=\"margin: 0 0 30px 0; font-size: 16px; color: #333333; line-height: 1.6;\">\n                                {{ $json.body.type == \"speaking\" ? \"Bài nói\" : \"Bài viết\" }} tuần vừa rồi của em đã được chữa xong.\n                            </p>\n                            \n                            <!-- Button -->\n                            <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n                                <tr>\n                                    <td align=\"center\" style=\"padding: 20px 0;\">\n                                        <a href=\"https://docs.google.com/document/d/1frBVGfgmjZuPf68wyconHpPm8mPZgpKbU9KF9r6IinI/edit?tab=t.0\" style=\"display: inline-block; padding: 16px 40px; background-color: #5FB5A0; color: #ffffff; text-decoration: none; border-radius: 50px; font-size: 18px; font-weight: 500;\">\n                                            Hướng dẫn nộp bài chi tiết\n                                        </a>\n                                    </td>\n                                </tr>\n                            </table>\n                            \n                            <p style=\"margin: 30px 0 0 0; font-size: 16px; color: #333333; line-height: 1.6;\">\n                                Chúc em ôn tập tốt!\n                            </p>\n                        </td>\n                    </tr>\n                    \n                    <!-- Divider -->\n                    <tr>\n                        <td style=\"padding: 0 40px;\">\n                            <div style=\"border-top: 2px dashed #cccccc; margin: 30px 0;\"></div>\n                        </td>\n                    </tr>\n                    \n                    <!-- Footer -->\n                    <tr>\n                        <td style=\"padding: 30px 40px 40px 40px; text-align: center;\">\n                            <p style=\"margin: 0 0 10px 0; font-size: 18px; color: #333333; font-weight: 600;\">\n                                Mr. Hoàng Tiến Dũng\n                            </p>\n                            <p style=\"margin: 0; font-size: 16px; color: #666666;\">\n                                Giáo viên Tiếng Anh tại Dũng English Speaking\n                            </p>\n                        </td>\n                    </tr>\n                </table>\n            </td>\n        </tr>\n    </table>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        -160
+      ],
+      "id": "4bbaab3c-b24a-4b66-9320-6ece25681246",
+      "name": "Send success",
+      "webhookId": "0074e375-066f-4b59-96a5-87187006449b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4tHKqfwCKAekX23J",
+          "name": "Dragon Review"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "```\n{\n    \"is_error\": true,\n    \"type\": \"speaking\",\n    \"fullUrl\": \"https://marking-log.quocbangdev.asia/?name=bangthong&speaking=https://docs.google.com/document/d/1-TJ4DUAyZg8uIMG7nTR16KHx5uuoGE8uzmStgWdA5bk\",\n    \"email\": \"bangquoc9@gmail.com\",\n    \"fullName\": \"Thong Quoc Bang\",\n    \"topic\": \"Test Thoi\",\n    \"error_message\": \"Nộp nhầm đề\"\n}\n```",
+        "height": 768,
+        "width": 1392
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -272,
+        -368
+      ],
+      "typeVersion": 1,
+      "id": "c73a013e-1f28-4bb5-a86f-1b638062469d",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "is success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "is success": {
+      "main": [
+        [
+          {
+            "node": "Send success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b9abc2a99c69957c091b96c25d48690c3bbd89cffa33ca8d5bfc1f6b14755b1"
+  }
+}

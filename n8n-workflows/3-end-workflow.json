@@ -460,7 +460,7 @@
             "totalElapsedSec": "={{ $json.totalElapsedSec }}",
             "activityPercentage": "={{ $json.activityPercentage }}",
             "reason": "={{ $json.reason }}",
-            "endDate": "={{ $json.endTime.format(\"yyyy-mm-dd\") }}",
+            "endDate": "={{ new Date($json.endTime).toISOString().slice(0, 10) }}",
             "type": "={{ $json.type }}"
           },
           "matchingColumns": [],
@@ -1086,6 +1086,7 @@
       ],
       "id": "6ad1a1a7-e3b5-4832-a6e0-752d106f4ae0",
       "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "umrAZGShoRxgB742",

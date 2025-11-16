@@ -333,6 +333,8 @@
   const iframe = document.getElementById('docFrame');
   if (docUrl) {
     iframe.src = docUrl;
+  } else if (speaking) {
+    iframe.src = speaking;
   }
 
   // Extract document ID from URL to create document-specific localStorage key

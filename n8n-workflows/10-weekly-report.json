@@ -1,0 +1,297 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        -96
+      ],
+      "id": "c7181f9c-6029-49ed-895d-3d514cb8234e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M",
+          "mode": "list",
+          "cachedResultName": "Tracking Sessions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1431572029,
+          "mode": "list",
+          "cachedResultName": "Completed",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit#gid=1431572029"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "endDate",
+              "lookupValue": "={{ $now.format('yyyy-MM-dd') }}"
+            },
+            {
+              "lookupColumn": "endDate",
+              "lookupValue": "={{ $now.minus(1, 'days').format('yyyy-MM-dd') }}"
+            },
+            {
+              "lookupColumn": "endDate",
+              "lookupValue": "={{ $now.minus(7, 'days').format('yyyy-MM-dd') }}"
+            },
+            {
+              "lookupColumn": "endDate",
+              "lookupValue": "={{ $now.minus(6, 'days').format('yyyy-MM-dd') }}"
+            },
+            {
+              "lookupColumn": "endDate",
+              "lookupValue": "={{ $now.minus(5, 'days').format('yyyy-MM-dd') }}"
+            },
+            {
+              "lookupColumn": "endDate",
+              "lookupValue": "={{ $now.minus(4, 'days').format('yyyy-MM-dd') }}"
+            },
+            {
+              "lookupColumn": "endDate",
+              "lookupValue": "={{ $now.minus(3, 'days').format('yyyy-MM-dd') }}"
+            },
+            {
+              "lookupColumn": "endDate",
+              "lookupValue": "={{ $now.minus(2, 'days').format('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        -96
+      ],
+      "id": "d4d92ccd-1281-4311-a35d-88b766f43db8",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "umrAZGShoRxgB742",
+          "name": "bangquoc9-sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a2480c99-d6b2-4a96-b299-b5027f1e5c8f",
+              "leftValue": "={{ $json.type }}",
+              "rightValue": "writing",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "5a4bcd24-4b2f-4d76-960d-04f281dee9ab",
+              "leftValue": "={{ $now.minus(7, 'days') }}",
+              "rightValue": "={{ $json.endTime }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "beforeOrEquals"
+              }
+            },
+            {
+              "id": "7fd1e599-4501-4e96-b5ee-f6a0535c44a0",
+              "leftValue": "={{ $now }}",
+              "rightValue": "={{ $json.endTime }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        848,
+        -96
+      ],
+      "id": "8f89d985-6315-4f86-bf90-353d136929c5",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from datetime import datetime, timedelta\n\ndef format_time(seconds):\n    \"\"\"Convert seconds to 'X giờ Y phút Z giây' format\"\"\"\n    hours = seconds // 3600\n    minutes = (seconds % 3600) // 60\n    secs = seconds % 60\n    \n    parts = []\n    if hours > 0:\n        parts.append(f\"{hours} giờ\")\n    if minutes > 0:\n        parts.append(f\"{minutes} phút\")\n    if secs > 0 or not parts:\n        parts.append(f\"{secs} giây\")\n    \n    return \" \".join(parts)\n\n# Calculate date range\ncurrent_date = datetime.now()\nfrom_date = current_date - timedelta(days=7)\n\n# Format dates\ncurrent_date_str = current_date.strftime('%d/%m/%Y')\nfrom_date_str = from_date.strftime('%d/%m/%Y')\n\noutput = []\n\nfor item in _input.all():\n    # Loop through each teacher\n    for teacher_name, teacher_data in item.json.items():\n        # Extract data from nested object\n        work_seconds = teacher_data.get('activeSec', 0)\n        count = teacher_data.get('count', 0)\n        \n        # Format message\n        message = f\"\"\"📊 Báo cáo hằng tuần: từ ngày {from_date_str} đến {current_date_str}\n━━━━━━━━━━━━━━━━━━━━━\n\n👤 Giáo viên: {teacher_name}\n⏰ Tổng thời gian làm việc: {format_time(work_seconds)}\n✅ Tổng số bài đã chấm: {count}\n\n━━━━━━━━━━━━━━━━━━━━━\"\"\"\n        \n        output.append({\n            \"teacher_name\": teacher_name,\n            \"work_seconds\": work_seconds,\n            \"count\": count,\n            \"from_date\": from_date_str,\n            \"to_date\": current_date_str,\n            \"report_message\": message\n        })\n\nreturn output"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        -96
+      ],
+      "id": "b7aea490-af3e-4d0e-98b4-6e1ce05f5ce6",
+      "name": "Code in Python (Beta)"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "# Loop over input items and add a new field called 'myNewField' to the JSON of each one\nresult = {}\nfor item in _input.all():\n  teacher_name = item.json.name\n  \n  data = result.get(teacher_name)\n  if data:\n    newData = {\n      \"activeSec\": data.get(\"activeSec\", 0) + item.json.activeSec,\n      \"count\": data.get(\"count\", 0) + 1,\n    }\n  else:    \n    result.update({\n      item.json.name: {\n        \"activeSec\": item.json.activeSec,\n        \"count\": 1,\n      }\n    })\nreturn result"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        -96
+      ],
+      "id": "229b6299-bd60-412c-b2b8-1def470e960a",
+      "name": "Code in Python (Beta)1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1664,
+        -96
+      ],
+      "id": "c1983593-a0ae-4a0a-bc83-0fe4812416b5",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "chatId": "5273536054",
+        "text": "={{ $json.report_message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "MarkdownV2"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2064,
+        -80
+      ],
+      "id": "425e0c7a-09ec-4849-bad2-1f2605df30ff",
+      "name": "Send a text message",
+      "webhookId": "3829c214-5f3e-4f6a-aaf6-9c71f466ead3",
+      "credentials": {
+        "telegramApi": {
+          "id": "0GZ3bMxpSTNMupMZ",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Code in Python (Beta)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python (Beta)": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python (Beta)1": {
+      "main": [
+        [
+          {
+            "node": "Code in Python (Beta)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "6b9abc2a99c69957c091b96c25d48690c3bbd89cffa33ca8d5bfc1f6b14755b1"
+  }
+}

@@ -1,0 +1,364 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM",
+          "mode": "list",
+          "cachedResultName": "Check bài viết ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1057942505,
+          "mode": "list",
+          "cachedResultName": "Lớp 4658 ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit#gid=1057942505"
+        },
+        "event": "rowUpdate",
+        "options": {
+          "columnsToWatch": [
+            "Người chấm "
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1776,
+        -48
+      ],
+      "id": "641d7490-8d06-490f-8d8e-2352dd44de2c",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "IhfX14FPV8nD4GTl",
+          "name": "BienKichVang"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1376,
+        -48
+      ],
+      "id": "875763c2-2e99-481f-804b-0592d89c2e62",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        -32
+      ],
+      "id": "025732a5-5144-4662-8639-f75c67988d50"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM",
+          "mode": "list",
+          "cachedResultName": "Check bài viết ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1383647999,
+          "mode": "list",
+          "cachedResultName": "Full",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit#gid=1383647999"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "Link"
+          ],
+          "schema": [
+            {
+              "id": "Dấu thời gian",
+              "displayName": "Dấu thời gian",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Chủ đề",
+              "displayName": "Chủ đề",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Họ và tên",
+              "displayName": "Họ và tên",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Số điện thoại",
+              "displayName": "Số điện thoại",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tên",
+              "displayName": "Tên",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type",
+              "displayName": "Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Error",
+              "displayName": "Error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Địa chỉ email",
+              "displayName": "Địa chỉ email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sheet URL",
+              "displayName": "Sheet URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -224,
+        -64
+      ],
+      "id": "bdf24e16-959b-4ee5-9930-ae2d45cd9412",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "lZEwATI4LCE6jNXJ",
+          "name": "n8n-1-557@modular-rex-435916-t9.iam.gserviceaccount.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "79fed0f1-070e-4722-82ef-4b370741ffe3",
+              "name": "Link",
+              "value": "=https://marking-log.dungenglishspeaking.com/?name={{ $json[\"Người chấm \"].trim() }}&doc={{ $json.Link }}",
+              "type": "string"
+            },
+            {
+              "id": "e3f0704b-4fc1-4234-9d0d-2f367a422d65",
+              "name": "Sheet URL",
+              "value": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit#gid=22678023",
+              "type": "string"
+            },
+            {
+              "id": "0c307966-637c-4f9e-b3f3-f93212959d11",
+              "name": "Tên",
+              "value": "={{ $json[\"Người chấm \"] }}",
+              "type": "string"
+            },
+            {
+              "id": "29b9133f-c64f-475f-94fa-c722e8e89264",
+              "name": "Dấu thời gian",
+              "value": "={{ $json[\"Dấu thời gian\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "607482a7-bb4a-41c7-a38b-72eab9729b12",
+              "name": "Chủ đề",
+              "value": "={{ $json[\"Chủ đề \"] }}",
+              "type": "string"
+            },
+            {
+              "id": "200eb4a8-b686-4074-9285-dc6d3bf91e7e",
+              "name": "Họ và tên",
+              "value": "={{ $json[\"Họ và tên \"] }}",
+              "type": "string"
+            },
+            {
+              "id": "c142d743-d752-4934-bd7c-4bdab99f3927",
+              "name": "Số điện thoại",
+              "value": "={{ $json[\"Số điện thoại \"] }}",
+              "type": "string"
+            },
+            {
+              "id": "fdd9acb3-b459-439d-a77e-de71b625c211",
+              "name": "Type",
+              "value": "={{ $json[\"Type \"] }}",
+              "type": "string"
+            },
+            {
+              "id": "1fb206b1-144b-4ef0-b9cc-1102151faf07",
+              "name": "Error",
+              "value": "={{ $json[\"Error\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "c606cdf8-2a85-4d21-8829-aac1929fcd11",
+              "name": "Địa chỉ email",
+              "value": "={{ $json[\"Địa chỉ email\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "includeFields": "row_number",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -976,
+        -32
+      ],
+      "id": "2093a846-2dba-4aac-b2c1-0a4ffd67481b",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "a7f6df443063e1201816e09e7012f9b750d9d0e2a55c255ef1db35efa96f79ff"
+  }
+}

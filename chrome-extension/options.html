@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Marking Tracker - Settings</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      margin: 0 0 30px 0;
+      font-size: 28px;
+      font-weight: 600;
+      color: #667eea;
+    }
+    
+    .section {
+      margin-bottom: 30px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .section:last-child {
+      border-bottom: none;
+    }
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #333;
+    }
+    
+    .setting-item {
+      margin-bottom: 20px;
+    }
+    
+    .setting-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+    }
+    
+    .setting-input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+      transition: border-color 0.2s ease;
+    }
+    
+    .setting-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .setting-description {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .checkbox-container input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    
+    .button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .button-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .button-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .button-secondary {
+      background: #f5f5f5;
+      color: #666;
+      margin-left: 12px;
+    }
+    
+    .button-secondary:hover {
+      background: #e0e0e0;
+    }
+    
+    .save-status {
+      display: inline-block;
+      margin-left: 12px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .save-status.show {
+      opacity: 1;
+    }
+    
+    .save-status.success {
+      background: #e8f5e9;
+      color: #4caf50;
+    }
+    
+    .save-status.error {
+      background: #ffebee;
+      color: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚙️ Settings</h1>
+    
+    <div class="section">
+      <div class="section-title">Teacher Information</div>
+      
+      <div class="setting-item">
+        <label class="setting-label" for="teacher-name">Teacher Name</label>
+        <input type="text" id="teacher-name" class="setting-input" placeholder="Enter your name">
+        <div class="setting-description">This will be used to identify your marking sessions</div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">Backend Configuration</div>
+      
+      <div class="setting-item">
+        <label class="setting-label" for="backend-url">Backend URL</label>
+        <input type="text" id="backend-url" class="setting-input" value="https://n8n.dungenglishspeaking.com/webhook/marking-log">
+        <div class="setting-description">The backend API endpoint for tracking sessions</div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">Session Settings</div>
+      
+      <div class="setting-item">
+        <label class="setting-label" for="heartbeat-interval">Heartbeat Interval (seconds)</label>
+        <input type="number" id="heartbeat-interval" class="setting-input" value="5" min="1" max="60">
+        <div class="setting-description">How often to send heartbeat signals (default: 5 seconds)</div>
+      </div>
+      
+      <div class="setting-item">
+        <label class="setting-label" for="activity-timeout">Activity Timeout (seconds)</label>
+        <input type="number" id="activity-timeout" class="setting-input" value="45" min="10" max="300">
+        <div class="setting-description">Time before marking user as inactive (default: 45 seconds)</div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="checkbox-container">
+          <input type="checkbox" id="auto-start">
+          <label class="setting-label" for="auto-start" style="margin: 0;">Auto-start session on page load</label>
+        </div>
+        <div class="setting-description">Automatically start tracking when opening a Google Doc</div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">Notifications</div>
+      
+      <div class="setting-item">
+        <div class="checkbox-container">
+          <input type="checkbox" id="enable-notifications" checked>
+          <label class="setting-label" for="enable-notifications" style="margin: 0;">Enable notifications</label>
+        </div>
+        <div class="setting-description">Show notifications for session events</div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="checkbox-container">
+          <input type="checkbox" id="session-reminders" checked>
+          <label class="setting-label" for="session-reminders" style="margin: 0;">Session reminders</label>
+        </div>
+        <div class="setting-description">Remind to complete session after long idle time</div>
+      </div>
+    </div>
+    
+    <div style="margin-top: 30px;">
+      <button class="button button-primary" id="save-btn">Save Settings</button>
+      <button class="button button-secondary" id="reset-btn">Reset to Default</button>
+      <span class="save-status" id="save-status"></span>
+    </div>
+  </div>
+  
+  <script src="options.js"></script>
+</body>
+</html>

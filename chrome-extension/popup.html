@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Marking Tracker</title>
+  <style>
+    body {
+      width: 350px;
+      min-height: 400px;
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    h1 {
+      margin: 0 0 20px 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    
+    .section {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      opacity: 0.9;
+    }
+    
+    .session-item {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+    
+    .session-info {
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    
+    .session-time {
+      font-size: 11px;
+      opacity: 0.8;
+    }
+    
+    .no-sessions {
+      font-size: 13px;
+      opacity: 0.8;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #667eea;
+    }
+    
+    .button:hover {
+      background: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .button-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+    
+    .button-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    
+    .stat-box {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .stat-label {
+      font-size: 11px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎓 Marking Tracker</h1>
+  
+  <div class="section">
+    <div class="section-title">Active Sessions</div>
+    <div id="sessions-container">
+      <div class="no-sessions">No active sessions</div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">Quick Actions</div>
+    <button class="button" id="report-btn">⚠ Report Error</button>
+    <button class="button button-secondary" id="options-btn">⚙️ Settings</button>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">Statistics</div>
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-value" id="today-count">0</div>
+        <div class="stat-label">Today</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="total-count">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

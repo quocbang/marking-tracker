@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Report Error - Marking Tracker</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      margin: 0 0 10px 0;
+      font-size: 28px;
+      font-weight: 600;
+      color: #667eea;
+    }
+    
+    .subtitle {
+      margin-bottom: 30px;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .form-group {
+      margin-bottom: 24px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: border-color 0.2s ease;
+    }
+    
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    .form-description {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .required {
+      color: #ff5252;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+    }
+    
+    .button {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .button-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .button-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .button-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .button-secondary {
+      background: #f5f5f5;
+      color: #666;
+    }
+    
+    .button-secondary:hover {
+      background: #e0e0e0;
+    }
+    
+    .success-message {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+    
+    .success-message.show {
+      display: block;
+    }
+    
+    .success-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    
+    .success-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #4caf50;
+    }
+    
+    .success-text {
+      color: #666;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="form-container">
+      <h1>⚠️ Report Error</h1>
+      <p class="subtitle">Help us improve by reporting any issues you encounter</p>
+      
+      <div class="form-group">
+        <label class="form-label" for="error-type">
+          Error Type <span class="required">*</span>
+        </label>
+        <select class="form-select" id="error-type" required>
+          <option value="">-- Select error type --</option>
+          <option value="session_lost">System Error - Session Lost</option>
+          <option value="network_error">Network Error - Cannot Send Heartbeat</option>
+          <option value="ui_lag">UI Lag/Freeze</option>
+          <option value="doc_not_load">Google Doc Won't Load</option>
+          <option value="button_not_work">Complete Button Not Working</option>
+          <option value="extension_not_work">Extension Not Working</option>
+          <option value="other">Other (please describe)</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="error-description">
+          Description <span id="description-required" class="required" style="display: none;">*</span>
+        </label>
+        <textarea 
+          class="form-textarea" 
+          id="error-description" 
+          placeholder="Please describe what happened..."
+        ></textarea>
+        <div class="form-description">
+          Provide as much detail as possible to help us fix the issue
+        </div>
+      </div>
+      
+      <div class="button-group">
+        <button class="button button-secondary" id="cancel-btn">Cancel</button>
+        <button class="button button-primary" id="submit-btn">Submit Report</button>
+      </div>
+    </div>
+    
+    <div class="success-message" id="success-message">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Report Submitted!</div>
+      <div class="success-text">Thank you for your feedback. We'll investigate this issue.</div>
+      <button class="button button-primary" id="close-btn">Close</button>
+    </div>
+  </div>
+  
+  <script src="report.js"></script>
+</body>
+</html>

@@ -5,8 +5,124 @@
   <title>Dũng English Speaking</title>
   <link rel="icon" type="image/png" href="https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_document_x16.png">
   <style>
-    html,body,iframe{margin:0;padding:0;width:100%;height:100%} 
-    iframe{border:none}
+    html,body{margin:0;padding:0;width:100%;height:100%;font-family:Arial,sans-serif}
+
+    /* Main Layout */
+    .app-container {
+      display: flex;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Left Panel - Content Display */
+    .content-panel {
+      flex: 0 0 45%;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-header {
+      padding: 16px 20px;
+      background: #ffffff;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      flex-shrink: 0;
+    }
+
+    .content-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      line-height: 1.6;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .content-placeholder {
+      color: #666;
+      font-style: italic;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    /* Right Panel - Google Docs */
+    .docs-panel {
+      flex: 1;
+      position: relative;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Resizable Divider */
+    .resize-divider {
+      width: 8px;
+      background: #f0f0f0;
+      cursor: col-resize;
+      position: relative;
+      flex-shrink: 0;
+      transition: background-color 0.2s ease;
+      z-index: 10;
+    }
+
+    .resize-divider:hover {
+      background: #e0e0e0;
+    }
+
+    .resize-divider:active {
+      background: #d0d0d0;
+    }
+
+    .resize-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 2px;
+      height: 40px;
+      background: #ccc;
+      border-radius: 1px;
+      opacity: 0.6;
+      transition: opacity 0.2s ease;
+    }
+
+    .resize-divider:hover .resize-handle {
+      opacity: 1;
+    }
+
+    /* Hide divider on mobile */
+    @media (max-width: 768px) {
+      .resize-divider {
+        display: none;
+      }
+    }
+
+    /* Resize overlay to prevent iframe interference */
+    .resize-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 9999;
+      cursor: col-resize;
+      background: transparent;
+      display: none;
+    }
+
+    /* Optimize panel for resizing */
+    .content-panel {
+      transition: none;
+    }
     
     /* Floating Action Button */
     .fab-container {
@@ -259,10 +375,110 @@
       background: #ccc;
       cursor: not-allowed;
     }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .app-container {
+        flex-direction: column;
+        height: auto;
+      }
+
+      .content-panel {
+        flex: 0 0 auto;
+        max-height: 40vh;
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .docs-panel {
+        flex: 1;
+        min-height: 60vh;
+      }
+
+      .fab-container {
+        bottom: 20px;
+        right: 20px;
+      }
+
+      .fab-button {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+      }
+
+      .fab-menu {
+        min-width: 180px;
+        padding: 12px 8px;
+      }
+
+      .fab-menu-button {
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .content-panel {
+        max-height: 35vh;
+      }
+
+      .docs-panel {
+        min-height: 65vh;
+      }
+
+      .content-header {
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+
+      .content-body {
+        padding: 16px;
+        font-size: 13px;
+      }
+
+      .fab-container {
+        bottom: 15px;
+        right: 15px;
+      }
+
+      .fab-button {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+      }
+
+      .fab-menu {
+        min-width: 160px;
+        padding: 10px 6px;
+      }
+
+      .fab-menu-button {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+    }
   </style>
 </head>
 <body>
-  <iframe id="docFrame"></iframe>
+  <div class="app-container">
+    <!-- Left Panel - Content Display -->
+    <div class="content-panel">
+      <div class="content-header">Nội dung bài tập</div>
+      <div class="content-body" id="contentBody">
+        <div class="content-placeholder">Đang tải nội dung...</div>
+      </div>
+    </div>
+
+    <!-- Resizable Divider -->
+    <div class="resize-divider" id="resizeDivider">
+      <div class="resize-handle"></div>
+    </div>
+
+    <!-- Right Panel - Google Docs -->
+    <div class="docs-panel">
+      <iframe id="docFrame"></iframe>
+    </div>
+  </div>
 
   <!-- Floating Action Button -->
   <div class="fab-container">
@@ -319,10 +535,10 @@
 (async function(){
   const params = new URLSearchParams(window.location.search);
   const name = params.get('name') || 'unknown';
-  const docUrl = params.get('doc');
+  const docUrl = params.get('writing_url');
   const speaking = params.get('speaking');
   const type = docUrl ? 'writing' : speaking ? 'speaking' : null;
-  if(!docUrl && !speaking) { document.body.innerHTML = '<h3>Missing ?doc= or ?speaking= param</h3>'; return; }
+  if(!docUrl && !speaking) { document.body.innerHTML = '<h3>Missing ?writing_url= or ?speaking= param</h3>'; return; }
 
   const BACKEND = 'https://n8n.dungenglishspeaking.com/webhook/marking-log';
   const START_URL = BACKEND + '/start';
@@ -419,7 +635,8 @@
         session = {
           sessionId: res.data.sessionId,
           createdAt: Date.now(),
-          expiresAt: Date.now() + (res.data.ttlMs || 4*60*60*1000)
+          expiresAt: Date.now() + (res.data.ttlMs || 4*60*60*1000),
+          originalContent: res.data.original_content || null
         };
         localStorage.setItem(LS_KEY, JSON.stringify(session));
         console.log('New session created:', session.sessionId);
@@ -476,7 +693,74 @@
 
   await ensureSession();
 
-  async function sendHeartbeat() {  
+  // Function to fetch content from Google Docs URL via API
+  async function fetchGoogleDocsContent(url) {
+    try {
+      console.log('Fetching content from Google Docs API:', url);
+
+      // Use the dedicated API endpoint for fetching doc content
+      const apiUrl = `https://n8n.dungenglishspeaking.com/webhook/marking-log/fetch-doc-content?writing_url=${encodeURIComponent(url)}`;
+
+      const response = await fetch(apiUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data && data.original_content) {
+        console.log('Successfully fetched content from Google Docs API');
+        return data.original_content.trim();
+      } else {
+        console.warn('API response missing original_content');
+        return null;
+      }
+    } catch (error) {
+      console.warn('Failed to fetch from Google Docs API:', error);
+      return null;
+    }
+  }
+
+  // Function to display content - try Google Docs first, then API fallback
+  async function displayContent() {
+    const contentBody = document.getElementById('contentBody');
+
+    try {
+      // Show loading state
+      contentBody.innerHTML = '<div class="content-placeholder">Đang tải nội dung...</div>';
+
+      let content = null;
+
+      // Try fetching from Google Docs first (only for writing mode)
+      if (docUrl) {
+        content = await fetchGoogleDocsContent(docUrl);
+      }
+
+      // If Google Docs fetch failed or not available, use API content
+      if (!content && session && session.originalContent) {
+        console.log('Using API content as fallback');
+        content = session.originalContent;
+      }
+
+      // Display content or show error
+      if (content) {
+        contentBody.innerHTML = `<textarea id="contentTextarea" style="width: 100%; height: 100%; border: none; outline: none; resize: none; padding: 0; margin: 0; background: transparent; font-family: inherit; font-size: inherit; line-height: inherit; color: inherit; white-space: pre-wrap;">${content}</textarea>`;
+        console.log('Content displayed successfully');
+      } else {
+        contentBody.innerHTML = '<div class="content-placeholder">Không thể tải nội dung bài tập</div>';
+        console.warn('No content available from either source');
+      }
+
+    } catch (error) {
+      console.error('Error displaying content:', error);
+      contentBody.innerHTML = '<div class="content-placeholder">Lỗi khi tải nội dung</div>';
+    }
+  }
+
+  // Display original content - try Google Docs first, then fallback to API
+  displayContent();
+
+  async function sendHeartbeat() {
     if (!session) return;
     const body = { sessionId: session.sessionId, ts: new Date().toISOString() };
     // include 'active' flag if user has recent activity (<45s)
@@ -841,6 +1125,120 @@
       submitBtn.click();
     }
   });
+
+  // ===== Resizable Divider Logic =====
+
+  // Initialize panel width from localStorage or default
+  const PANEL_WIDTH_KEY = 'panel_width_preference';
+  let currentPanelWidth = parseFloat(localStorage.getItem(PANEL_WIDTH_KEY)) || 45; // Default 45%
+
+  // Apply initial width
+  const contentPanel = document.querySelector('.content-panel');
+  contentPanel.style.flex = `0 0 ${currentPanelWidth}%`;
+
+  const resizeDivider = document.getElementById('resizeDivider');
+  let isResizing = false;
+  let startX = 0;
+  let startWidth = 0;
+  let containerWidth = 0; // Cache container width
+  let resizeOverlay = null; // Overlay element to prevent iframe interference
+
+  // Create resize overlay element
+  function createResizeOverlay() {
+    if (resizeOverlay) return resizeOverlay;
+
+    resizeOverlay = document.createElement('div');
+    resizeOverlay.className = 'resize-overlay';
+    document.body.appendChild(resizeOverlay);
+    return resizeOverlay;
+  }
+
+  // Only enable resizing on desktop (screen width > 768px)
+  function updateResizeCapability() {
+    const isDesktop = window.innerWidth > 768;
+    resizeDivider.style.display = isDesktop ? 'block' : 'none';
+
+    if (isDesktop) {
+      resizeDivider.addEventListener('mousedown', startResize);
+      document.addEventListener('mousemove', resize);
+      document.addEventListener('mouseup', stopResize);
+    } else {
+      resizeDivider.removeEventListener('mousedown', startResize);
+      document.removeEventListener('mousemove', resize);
+      document.removeEventListener('mouseup', stopResize);
+    }
+  }
+
+  function startResize(e) {
+    isResizing = true;
+    startX = e.clientX;
+    startWidth = currentPanelWidth;
+
+    // Cache container width at start to avoid recalculating on every move
+    const container = document.querySelector('.app-container');
+    containerWidth = container.getBoundingClientRect().width;
+
+    // Create and show overlay to prevent iframe interference
+    createResizeOverlay();
+    resizeOverlay.style.display = 'block';
+
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    // Add will-change hint for smooth animation
+    contentPanel.style.willChange = 'flex-basis';
+
+    e.preventDefault();
+  }
+
+  function resize(e) {
+    if (!isResizing) return;
+
+    // Use cached container width and requestAnimationFrame for smooth updates
+    const deltaX = e.clientX - startX;
+    const deltaPercent = (deltaX / containerWidth) * 100;
+
+    let newWidth = startWidth + deltaPercent;
+
+    // Constrain width between 20% and 80%
+    newWidth = Math.max(20, Math.min(80, newWidth));
+
+    currentPanelWidth = newWidth;
+
+    // Use requestAnimationFrame for smooth updates
+    requestAnimationFrame(() => {
+      contentPanel.style.flex = `0 0 ${newWidth}%`;
+    });
+
+    e.preventDefault();
+  }
+
+  function stopResize() {
+    if (!isResizing) return;
+
+    isResizing = false;
+
+    // Hide overlay
+    if (resizeOverlay) {
+      resizeOverlay.style.display = 'none';
+    }
+
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+
+    // Remove will-change hint
+    contentPanel.style.willChange = '';
+
+    // Save preference to localStorage
+    localStorage.setItem(PANEL_WIDTH_KEY, currentPanelWidth.toString());
+    console.log('Panel width saved:', currentPanelWidth + '%');
+  }
+
+  // Initialize resize capability
+  updateResizeCapability();
+
+  // Update on window resize
+  window.addEventListener('resize', updateResizeCapability);
 
 })();
 </script>

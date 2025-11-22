@@ -4,16 +4,65 @@ A comprehensive system for tracking marking time and managing student submission
 
 ## Components
 
-### 1. Marking Tracker (`index.html`)
-Real-time tracking system for measuring teacher marking activity on Google Docs.
+### 1. Marking Tracker
+
+Real-time tracking system for measuring teacher marking activity on Google Docs. Available in two implementations:
+
+#### Option A: Web App (`index.html`) - Quick Start
+Iframe-based web application that embeds Google Docs.
 
 **Features:**
-- Activity detection (mouse, keyboard, focus events)
-- Session persistence across page reloads
-- Google Sheets integration for data storage
-- Automated reporting and analytics
+- ✅ No installation required - works immediately
+- ✅ Cross-platform (any browser)
+- ✅ Activity detection (mouse, keyboard, focus events)
+- ✅ Session persistence across page reloads
+- ✅ Google Sheets integration for data storage
+- ✅ Automated reporting and analytics
+- ⚠️ Some console warnings from Google Docs (harmless)
+- ⚠️ Limited iframe integration due to CSP policies
 
 **Technologies:** HTML/CSS/JavaScript, n8n workflows, Google Sheets
+
+**Use When:** You need immediate access without installing anything.
+
+#### Option B: Chrome Extension (`chrome-extension/`) - Enhanced Integration
+Native Chrome extension that integrates directly with Google Docs.
+
+**Features:**
+- ✅ **No console errors** - proper Chrome extension APIs
+- ✅ **Better performance** - direct page access, no iframe
+- ✅ **Enhanced tracking** - full access to Google Docs events
+- ✅ **Background processing** - service worker manages sessions
+- ✅ **Multi-tab support** - track multiple documents simultaneously
+- ✅ **Floating action button** - injected directly into Google Docs
+- ✅ **Offline capability** - works without internet for tracking
+- ✅ **Settings page** - customizable preferences
+- ✅ **Statistics dashboard** - daily and total session counts
+- ❌ Requires manual installation (one-time setup)
+- ❌ Chrome/Edge only
+
+**Technologies:** Chrome Extension Manifest V3, Service Workers, Content Scripts
+
+**Use When:** You want the best performance and integration quality.
+
+**Installation:**
+1. Download or clone this repository
+2. Open Chrome → Extensions → Enable "Developer mode"
+3. Click "Load unpacked" → Select `chrome-extension/` folder
+4. Extension installed! See [chrome-extension/README.md](chrome-extension/README.md) for details
+
+**Comparison:**
+
+| Feature | Web App | Chrome Extension |
+|---------|---------|------------------|
+| Installation | None (instant) | One-time manual |
+| Console Errors | Yes (harmless) | No |
+| Performance | Good | Excellent |
+| Integration | Limited (iframe) | Full (native) |
+| Multi-tab | Manual | Automatic |
+| Platform | Any browser | Chrome/Edge only |
+| Updates | Automatic | Manual reload |
+| **Best For** | Quick access | Daily use |
 
 ### 2. Student Submission Portal (`submit.html`)
 Student-facing form for submitting speaking exercise audio files.
@@ -120,10 +169,20 @@ The submission form implements sophisticated progress tracking to provide users 
 - `POST /webhook/speaking/submit` - Handle student submissions
 
 ## File Structure
-```
+
+```plaintext
 /
-├── index.html                 # Marking tracker interface
+├── index.html                 # Marking tracker web interface
 ├── submit.html               # Student submission form
+├── chrome-extension/         # Chrome extension (enhanced tracker)
+│   ├── manifest.json        # Extension configuration
+│   ├── background.js        # Service worker
+│   ├── content.js          # Google Docs integration
+│   ├── popup.html/js       # Extension popup
+│   ├── options.html/js     # Settings page
+│   ├── report.html/js      # Error reporting
+│   ├── icons/              # Extension icons
+│   └── README.md           # Extension documentation
 ├── n8n-workflows/           # n8n workflow definitions
 │   ├── 1-start-workflow.json
 │   ├── 2-heartbeat-workflow.json

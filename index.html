@@ -534,11 +534,11 @@
 <script>
 (async function(){
   const params = new URLSearchParams(window.location.search);
-  const name = params.get('name') || 'unknown';
-  const docUrl = params.get('writing_url');
-  const speaking = params.get('speaking');
-  const type = docUrl ? 'writing' : speaking ? 'speaking' : null;
-  if(!docUrl && !speaking) { document.body.innerHTML = '<h3>Missing ?writing_url= or ?speaking= param</h3>'; return; }
+  const name = params.get('name') || 'unknown';  
+  const doc_id= params.get('doc_id')
+  docUrl = `https://docs.google.com/document/d/${doc_id}`;
+  const type = docUrl ? 'doc' : speaking ? 'speaking' : null;
+  if(!docUrl && !speaking) { document.body.innerHTML = '<h3>Missing ?doc= or ?speaking= param</h3>'; return; }
 
   const BACKEND = 'https://n8n.dungenglishspeaking.com/webhook/marking-log';
   const START_URL = BACKEND + '/start';
@@ -546,7 +546,7 @@
   const END_URL = BACKEND + '/end';
   const ERRORS_URL = BACKEND + '/errors';
 
-  const iframe = document.getElementById('docFrame');
+  const iframe = document.getElementById('docFrame');  
   if (docUrl) {
     iframe.src = docUrl;
   } else if (speaking) {
@@ -606,6 +606,15 @@
       console.warn('post error', e);
       return { ok: false, status: 0, data: null, errorCode: null };
     }
+  }
+
+  // helper: get full URL with doc parameter
+  function getFullUrl() {
+    const url = new URL(window.location.href);
+    if (docUrl) {
+      url.searchParams.set('doc', docUrl);
+    }
+    return url.toString();
   }
 
   // create new session if none or expired
@@ -699,7 +708,7 @@
       console.log('Fetching content from Google Docs API:', url);
 
       // Use the dedicated API endpoint for fetching doc content
-      const apiUrl = `https://n8n.dungenglishspeaking.com/webhook/marking-log/fetch-doc-content?writing_url=${encodeURIComponent(url)}`;
+      const apiUrl = `https://n8n.dungenglishspeaking.com/webhook/marking-log/fetch-doc-content?doc_id=${encodeURIComponent(doc_id)}`;
 
       const response = await fetch(apiUrl);
       if (!response.ok) {
@@ -799,7 +808,7 @@
       sessionId: session.sessionId,
       reason,
       ts: new Date().toISOString(),
-      fullUrl: window.location.href,
+      fullUrl: getFullUrl(),
       name: name,
       type: type
     };
@@ -904,7 +913,7 @@
             sessionId: session.sessionId,
             reason: 'finished',
             ts: new Date().toISOString(),
-            fullUrl: window.location.href,
+            fullUrl: getFullUrl(),
             name: name,
             type: type
           };
@@ -1101,7 +1110,7 @@
       console.log('Error Report:', errorReport);
 
       // Optional: Send to backend (you can add endpoint later)
-      errorReport.fullUrl = window.location.href;
+      errorReport.fullUrl = getFullUrl();
       const res = await postJson(ERRORS_URL, errorReport);
       if (res && res.data && res.data.nextLink) {
         // Redirect if nextLink is present

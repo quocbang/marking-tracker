@@ -540,7 +540,7 @@
   const type = docUrl ? 'doc' : speaking ? 'speaking' : null;
   if(!docUrl && !speaking) { document.body.innerHTML = '<h3>Missing ?doc= or ?speaking= param</h3>'; return; }
 
-  const BACKEND = 'https://n8n.dungenglishspeaking.com/webhook/marking-log';
+  const BACKEND = 'https://n8n.srv1145234.hstgr.cloud/webhook/marking-log';
   const START_URL = BACKEND + '/start';
   const HB_URL = BACKEND + '/heartbeat';
   const END_URL = BACKEND + '/end';
@@ -708,7 +708,7 @@
       console.log('Fetching content from Google Docs API:', url);
 
       // Use the dedicated API endpoint for fetching doc content
-      const apiUrl = `https://n8n.dungenglishspeaking.com/webhook/marking-log/fetch-doc-content?doc_id=${encodeURIComponent(doc_id)}`;
+      const apiUrl = `${BACKEND}/fetch-doc-content?doc_id=${encodeURIComponent(doc_id)}`;
 
       const response = await fetch(apiUrl);
       if (!response.ok) {

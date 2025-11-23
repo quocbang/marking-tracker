@@ -9,10 +9,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -144,
-        0
+        -1024,
+        240
       ],
-      "id": "c1b273bf-6a75-4fc7-84d0-7bfe3fe99e6a",
+      "id": "cfb587be-3009-4bb5-b380-ef3a83ae8720",
       "name": "Webhook",
       "webhookId": "42ee10d5-61ef-4705-a315-1aad10ff43f7"
     },
@@ -21,10 +21,10 @@
         "operation": "get",
         "dataTableId": {
           "__rl": true,
-          "value": "zvRbdcACYU6Wo5lp",
+          "value": "rxU4KZnaGnG5lLJ8",
           "mode": "list",
           "cachedResultName": "speaking_files",
-          "cachedResultUrl": "/projects/APIuaChzR7jtvCPU/datatables/zvRbdcACYU6Wo5lp"
+          "cachedResultUrl": "/projects/LNLBzzDc8DO3STen/datatables/rxU4KZnaGnG5lLJ8"
         },
         "filters": {
           "conditions": [
@@ -38,10 +38,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        384,
-        32
+        -480,
+        256
       ],
-      "id": "f29b4354-f2a4-4b3b-9fdd-ddab267d9b4d",
+      "id": "360b5660-f3bf-48c6-8b03-634ab8bce33b",
       "name": "Get row(s)"
     },
     {
@@ -51,10 +51,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        896,
-        0
+        16,
+        240
       ],
-      "id": "21ff55f2-b7b8-496a-9cfc-6c4b7d394717",
+      "id": "2ad90ee1-b350-4d38-9944-0897a5fd3241",
       "name": "Loop Over Items"
     },
     {
@@ -75,15 +75,15 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1808,
-        16
+        928,
+        256
       ],
-      "id": "114851e3-bb2e-476c-83c8-81c833f55bfe",
+      "id": "e38df72f-aedb-4285-a8de-73db27e94472",
       "name": "Upload file",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "ahBiJJu49RUpHt6q",
-          "name": "Google Drive account"
+          "id": "PPcHPoSX4FtN5pf4",
+          "name": "Sfast"
         }
       }
     },
@@ -95,10 +95,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2304,
-        -16
+        1424,
+        224
       ],
-      "id": "0f01b7bf-a4c0-4b67-8606-d54aa0c3debc",
+      "id": "fd805cd2-b906-4864-84af-78d060767a8b",
       "name": "Code in Python (Beta)"
     },
     {
@@ -129,14 +129,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1504,
-        16
+        624,
+        256
       ],
-      "id": "87c6d71a-a40c-4685-b44d-1e6f46beb10f",
+      "id": "14613890-c91f-4d29-8287-57551b25e209",
       "name": "download file from supabase",
       "credentials": {
         "supabaseApi": {
-          "id": "DkjdJe6T8I6bgxM6",
+          "id": "3ZgejMfpecUI7BKr",
           "name": "Supabase account"
         }
       }
@@ -162,17 +162,18 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        384,
-        -256
+        -512,
+        -160
       ],
-      "id": "a1918327-b77b-45f9-9555-ae668aa879a1",
+      "id": "6e37f79d-bfb7-4c8a-82f5-984159a4f552",
       "name": "Create folder",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "ahBiJJu49RUpHt6q",
-          "name": "Google Drive account"
+          "id": "PPcHPoSX4FtN5pf4",
+          "name": "Sfast"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -191,10 +192,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        592,
-        -256
+        -288,
+        -144
       ],
-      "id": "276c6c79-9e37-4400-9f1d-6d92478d29ba",
+      "id": "38370b17-874f-42c4-9e60-afd2e82be6e1",
       "name": "Edit Fields"
     },
     {
@@ -206,10 +207,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        624,
-        16
+        -96,
+        -144
       ],
-      "id": "0e00dd67-21fe-48ab-a130-1eaa5b2d1ec4",
+      "id": "af24e79e-2954-4851-b504-c501db78ea23",
       "name": "Merge"
     },
     {
@@ -223,10 +224,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1248,
-        16
+        368,
+        256
       ],
-      "id": "6462cfa4-9c14-4383-9c44-a77a294897e5",
+      "id": "1ecb8607-e33c-4dae-8a51-861c2b27cb19",
       "name": "cache"
     },
     {
@@ -252,10 +253,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2016,
-        16
+        1136,
+        256
       ],
-      "id": "e21a9f5c-1efa-47f2-9852-f11b98c80aa3",
+      "id": "2aaa1cfe-3224-4bc5-85a4-cc78af7208cf",
       "name": "Edit Fields1"
     },
     {
@@ -267,10 +268,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        2608,
-        304
+        1728,
+        544
       ],
-      "id": "69c5bbf0-da11-4140-b0c9-68bcffac2231",
+      "id": "79e8327d-d421-40c2-9183-9c8263537464",
       "name": "Merge1"
     },
     {
@@ -278,10 +279,10 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        384,
-        336
+        -496,
+        576
       ],
-      "id": "b0546486-327f-43dc-af46-c010519226e1",
+      "id": "92d0f074-d316-490f-83cb-af0cedb82ac3",
       "name": "No Operation, do nothing"
     },
     {
@@ -300,15 +301,15 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        3008,
-        304
+        2128,
+        736
       ],
-      "id": "f7f831f6-0d41-4172-b2ab-ea30056089c1",
+      "id": "2a34ad47-c6a2-4d73-8918-767f1461fd3f",
       "name": "Update a document1",
       "credentials": {
         "googleDocsOAuth2Api": {
-          "id": "y2V8bJpWD9jCQ502",
-          "name": "Google Docs account"
+          "id": "3XRgvxrHgxMY1eQa",
+          "name": "Sfast"
         }
       }
     },
@@ -335,7 +336,7 @@
             "Chủ đề": "={{ $json.body.topic }}",
             "Họ và tên": "={{ $json.body.fullName }}",
             "Số điện thoại": "={{ $json.body.phone }}",
-            "Link": "=marking-log.quocbangdev.asia/?name=bangthong&speaking=https://docs.google.com/document/d/{{ $json.documentId }}",
+            "Link": "=https://marking-log.quocbangdev.asia/?name=bangthong&speaking=https://docs.google.com/document/d/{{ $json.documentId }}",
             "Địa chỉ email": "={{ $json.body.email }}"
           },
           "matchingColumns": [],
@@ -424,15 +425,15 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        3680,
-        96
+        2800,
+        336
       ],
-      "id": "58ce85ec-3f74-4a4b-91a5-4ee0ebe8c0e0",
+      "id": "0b6d3af8-1b7a-4082-960f-3fb70a57e6b5",
       "name": "Append row in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "umrAZGShoRxgB742",
-          "name": "bangquoc9-sheet"
+          "id": "yB309TgEv57zLz6R",
+          "name": "Google Sheets account"
         }
       }
     },
@@ -445,10 +446,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3360,
-        96
+        2480,
+        336
       ],
-      "id": "bfc7dba2-8616-451d-a9eb-28f89523c70f",
+      "id": "988f77b3-801e-482d-8669-0d291bd847f7",
       "name": "Merge2"
     },
     {
@@ -471,14 +472,14 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1136,
-        688
+        256,
+        928
       ],
-      "id": "0e947ed4-583e-4297-8278-bda280a41c30",
+      "id": "e82f8294-413c-4adc-aca3-1bcb5e1179eb",
       "name": "HTTP Request",
       "credentials": {
         "supabaseApi": {
-          "id": "DkjdJe6T8I6bgxM6",
+          "id": "3ZgejMfpecUI7BKr",
           "name": "Supabase account"
         }
       }
@@ -488,10 +489,10 @@
         "operation": "get",
         "dataTableId": {
           "__rl": true,
-          "value": "zvRbdcACYU6Wo5lp",
+          "value": "rxU4KZnaGnG5lLJ8",
           "mode": "list",
           "cachedResultName": "speaking_files",
-          "cachedResultUrl": "/projects/APIuaChzR7jtvCPU/datatables/zvRbdcACYU6Wo5lp"
+          "cachedResultUrl": "/projects/LNLBzzDc8DO3STen/datatables/rxU4KZnaGnG5lLJ8"
         },
         "filters": {
           "conditions": [
@@ -505,10 +506,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        384,
-        672
+        -496,
+        912
       ],
-      "id": "fde05378-7799-4ee1-976b-5af211e710e8",
+      "id": "86c61b5a-553c-4d00-9ad3-2b11a7d335ae",
       "name": "Get row(s)1"
     },
     {
@@ -518,11 +519,77 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        752,
-        672
+        -128,
+        912
       ],
-      "id": "3041b4e8-383a-4499-a933-1bcfa7f1951a",
+      "id": "db5e984e-bc97-44ad-b320-f5238669b3fa",
       "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -272,
+        240
+      ],
+      "id": "224be941-d6cb-47b9-ae37-e31d84834d20",
+      "name": "Merge3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "323d50f8-f1f6-46b2-8e9a-b58c72bbe50b",
+              "name": "folder_id",
+              "value": "={{ $json.body.folder_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -480,
+        64
+      ],
+      "id": "75a38400-06eb-486c-99c7-122ff7f33cb4",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.body.doc_id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "replaceAll",
+              "text": "Bài thi đang được hệ thống cập nhật tự động vui lòng quay lại sau 5 phút nhé..."
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        2128,
+        288
+      ],
+      "id": "76f97dd7-1250-404a-bef6-ecb25d6e30a7",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "3XRgvxrHgxMY1eQa",
+          "name": "Sfast"
+        }
+      }
     }
   ],
   "connections": {
@@ -535,17 +602,17 @@
             "index": 0
           },
           {
-            "node": "Create folder",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "No Operation, do nothing",
             "type": "main",
             "index": 0
           },
           {
             "node": "Get row(s)1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields2",
             "type": "main",
             "index": 0
           }
@@ -556,7 +623,7 @@
       "main": [
         [
           {
-            "node": "Merge",
+            "node": "Merge3",
             "type": "main",
             "index": 1
           }
@@ -638,13 +705,7 @@
     },
     "Merge": {
       "main": [
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "cache": {
@@ -681,6 +742,11 @@
             "node": "Merge2",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -705,11 +771,6 @@
             "index": 1
           }
         ]
-      ]
-    },
-    "Append row in sheet": {
-      "main": [
-        []
       ]
     },
     "Merge2": {
@@ -756,11 +817,33 @@
           }
         ]
       ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "pinData": {},
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "6b9abc2a99c69957c091b96c25d48690c3bbd89cffa33ca8d5bfc1f6b14755b1"
+    "instanceId": "a7f6df443063e1201816e09e7012f9b750d9d0e2a55c255ef1db35efa96f79ff"
   }
 }

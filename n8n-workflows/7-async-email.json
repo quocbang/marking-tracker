@@ -9,10 +9,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -192,
-        0
+        80,
+        368
       ],
-      "id": "518d2bd1-6388-46d9-b389-6fc6b492c1e7",
+      "id": "429d5664-d8bd-444f-8fc2-29beb87359d3",
       "name": "Webhook",
       "webhookId": "01fe3d7b-17ed-46d7-b184-41bcd07db316"
     },
@@ -22,13 +22,13 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict",
+            "typeValidation": "loose",
             "version": 2
           },
           "conditions": [
             {
               "id": "956edbcc-5d45-4743-b73e-705612fceab4",
-              "leftValue": "={{ $json.body.is_error }}",
+              "leftValue": "={{ $json.body.is_error.toBoolean() }}",
               "rightValue": "",
               "operator": {
                 "type": "boolean",
@@ -45,10 +45,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        144,
-        0
+        416,
+        368
       ],
-      "id": "04ae77b8-3694-44fe-a8f0-fb8935afcd5c",
+      "id": "be2a7b16-243c-45e0-b326-1edb1bbf4721",
       "name": "is success"
     },
     {
@@ -61,16 +61,16 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        672,
-        144
+        944,
+        512
       ],
-      "id": "a179f8e0-4385-41c1-9831-003848f9ea67",
+      "id": "17c3cf6c-0250-492e-b7f6-4d492107f14f",
       "name": "Send error",
       "webhookId": "0074e375-066f-4b59-96a5-87187006449b",
       "credentials": {
         "gmailOAuth2": {
-          "id": "4tHKqfwCKAekX23J",
-          "name": "Dragon Review"
+          "id": "DTNqGO5kUoDeAkc8",
+          "name": "mail dung speaking "
         }
       }
     },
@@ -84,16 +84,16 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        672,
-        -160
+        944,
+        208
       ],
-      "id": "4bbaab3c-b24a-4b66-9320-6ece25681246",
+      "id": "0f2b5c73-cac8-431a-b7ac-bc470fef3170",
       "name": "Send success",
       "webhookId": "0074e375-066f-4b59-96a5-87187006449b",
       "credentials": {
         "gmailOAuth2": {
-          "id": "4tHKqfwCKAekX23J",
-          "name": "Dragon Review"
+          "id": "DTNqGO5kUoDeAkc8",
+          "name": "mail dung speaking "
         }
       }
     },
@@ -105,11 +105,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -272,
-        -368
+        0,
+        0
       ],
       "typeVersion": 1,
-      "id": "c73a013e-1f28-4bb5-a86f-1b638062469d",
+      "id": "a161ba17-5b9a-46e0-916e-8c8cf9a12f04",
       "name": "Sticky Note"
     }
   ],
@@ -147,6 +147,6 @@
   "pinData": {},
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "6b9abc2a99c69957c091b96c25d48690c3bbd89cffa33ca8d5bfc1f6b14755b1"
+    "instanceId": "a7f6df443063e1201816e09e7012f9b750d9d0e2a55c255ef1db35efa96f79ff"
   }
 }

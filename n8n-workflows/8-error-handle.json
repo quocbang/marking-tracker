@@ -67,7 +67,7 @@
           "mappingMode": "defineBelow",
           "value": {
             "Link": "={{ $json.body.fullUrl }}",
-            "Type ": "Lỗi ",
+            "Type ": "Lỗi",
             "Error ": "={{ $json.body.errorTypeLabel }}"
           },
           "matchingColumns": [
@@ -426,8 +426,8 @@
       "type": "n8n-nodes-base.limit",
       "typeVersion": 1,
       "position": [
-        864,
-        752
+        848,
+        400
       ],
       "id": "3896c8d8-bc34-48e8-af65-017176261798",
       "name": "Limit1"
@@ -560,8 +560,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        -176,
-        752
+        -192,
+        400
       ],
       "id": "78c14933-c965-4128-9a75-1fa8e3b7cfe5",
       "name": "update writing",
@@ -601,8 +601,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        64,
-        752
+        48,
+        400
       ],
       "id": "5d9e2c5b-a736-40d2-831e-ec653f60611a",
       "name": "get writing",
@@ -655,8 +655,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        304,
-        752
+        288,
+        400
       ],
       "id": "b7333589-905b-4cde-a465-6bcf4fd2e593",
       "name": "send writing async"
@@ -693,8 +693,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        544,
-        752
+        528,
+        400
       ],
       "id": "17b58827-9ab0-400f-8043-368d8c6be963",
       "name": "get list remaining writing",
@@ -714,130 +714,12 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -256,
-        704
+        -272,
+        352
       ],
       "typeVersion": 1,
       "id": "60d9070b-50e6-49de-88a0-be33f8bbc67f",
       "name": "Sticky Note"
-    },
-    {
-      "parameters": {
-        "authentication": "serviceAccount",
-        "documentId": {
-          "__rl": true,
-          "value": "1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM",
-          "mode": "list",
-          "cachedResultName": "Check bài viết ",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": 1383647999,
-          "mode": "list",
-          "cachedResultName": "Full",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit#gid=1383647999"
-        },
-        "filtersUI": {
-          "values": [
-            {
-              "lookupColumn": "Link",
-              "lookupValue": "={{ $json.body.fullUrl }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        -192,
-        448
-      ],
-      "id": "c39dde73-0a19-4d57-8dfc-2e846f733a37",
-      "name": "get detail",
-      "credentials": {
-        "googleApi": {
-          "id": "M0c8RWyLvkcDkvoq",
-          "name": "n8n-2-970@modular-rex-435916-t9.iam.gserviceaccount.com"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "authentication": "serviceAccount",
-        "operation": "update",
-        "documentId": {
-          "__rl": true,
-          "value": "1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM",
-          "mode": "list",
-          "cachedResultName": "Check bài viết ",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "={{ $('get detail').item.json[\"Sheet URL\"] }}",
-          "mode": "url"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {},
-          "matchingColumns": [],
-          "schema": [],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        288,
-        448
-      ],
-      "id": "cb3e599a-0e07-4fdd-8632-86c570fe083f",
-      "name": "Update row in sheet1",
-      "credentials": {
-        "googleApi": {
-          "id": "lZEwATI4LCE6jNXJ",
-          "name": "n8n-1-557@modular-rex-435916-t9.iam.gserviceaccount.com"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "edd2d96d-2535-4ac5-b8ea-c86f8c7d8a26",
-              "name": "Type ",
-              "value": "Lỗi ",
-              "type": "string"
-            },
-            {
-              "id": "0b5070ea-7d64-4b72-b9f2-e108df06fc8e",
-              "name": "Error ",
-              "value": "={{ $('Webhook').item.json.body.errorTypeLabel }}",
-              "type": "string"
-            },
-            {
-              "id": "f1018385-1960-49e1-b88a-a737a282b0a0",
-              "name": "row_number",
-              "value": "={{ $json.row_number }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        48,
-        448
-      ],
-      "id": "4fdf85f2-2000-4a3e-b2c0-d11f9dbfcfda",
-      "name": "Edit Fields1"
     }
   ],
   "connections": {
@@ -921,11 +803,6 @@
             "node": "Update row in sheet",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "get detail",
-            "type": "main",
-            "index": 0
           }
         ],
         [
@@ -997,28 +874,6 @@
         [
           {
             "node": "Limit1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "get detail": {
-      "main": [
-        [
-          {
-            "node": "Edit Fields1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Edit Fields1": {
-      "main": [
-        [
-          {
-            "node": "Update row in sheet1",
             "type": "main",
             "index": 0
           }

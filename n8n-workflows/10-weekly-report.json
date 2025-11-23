@@ -5,7 +5,11 @@
         "rule": {
           "interval": [
             {
-              "triggerAtHour": 6
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 10
             }
           ]
         }
@@ -13,14 +17,15 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        160,
-        -96
+        -80,
+        128
       ],
-      "id": "c7181f9c-6029-49ed-895d-3d514cb8234e",
+      "id": "5c0a82b5-3b68-435a-bf1f-2e06475cdf84",
       "name": "Schedule Trigger"
     },
     {
       "parameters": {
+        "authentication": "serviceAccount",
         "documentId": {
           "__rl": true,
           "value": "1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M",
@@ -77,16 +82,16 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        560,
-        -96
+        208,
+        128
       ],
-      "id": "d4d92ccd-1281-4311-a35d-88b766f43db8",
+      "id": "5b74965d-3661-4021-8878-0f695f7eb3d4",
       "name": "Get row(s) in sheet",
       "alwaysOutputData": false,
       "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "umrAZGShoRxgB742",
-          "name": "bangquoc9-sheet"
+        "googleApi": {
+          "id": "lZEwATI4LCE6jNXJ",
+          "name": "n8n-1-557@modular-rex-435916-t9.iam.gserviceaccount.com"
         }
       }
     },
@@ -137,10 +142,10 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        848,
-        -96
+        496,
+        128
       ],
-      "id": "8f89d985-6315-4f86-bf90-353d136929c5",
+      "id": "dc0579da-fed7-4df8-8c94-de26b20c0ba7",
       "name": "Filter"
     },
     {
@@ -151,10 +156,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1392,
-        -96
+        1040,
+        128
       ],
-      "id": "b7aea490-af3e-4d0e-98b4-6e1ce05f5ce6",
+      "id": "ed9b8bf8-e3f0-4276-b849-88c5f5180c0f",
       "name": "Code in Python (Beta)"
     },
     {
@@ -165,10 +170,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1136,
-        -96
+        784,
+        128
       ],
-      "id": "229b6299-bd60-412c-b2b8-1def470e960a",
+      "id": "f0cdcf69-61c4-43af-8361-e9d53aee66fe",
       "name": "Code in Python (Beta)1"
     },
     {
@@ -178,10 +183,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1664,
-        -96
+        1312,
+        128
       ],
-      "id": "c1983593-a0ae-4a0a-bc83-0fe4812416b5",
+      "id": "aa351f1f-b33d-4315-924b-67353458f044",
       "name": "Loop Over Items"
     },
     {
@@ -196,15 +201,15 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2064,
-        -80
+        1712,
+        144
       ],
-      "id": "425e0c7a-09ec-4849-bad2-1f2605df30ff",
+      "id": "0edf77e6-60bb-48ef-9d41-c93e1ae5e9d5",
       "name": "Send a text message",
       "webhookId": "3829c214-5f3e-4f6a-aaf6-9c71f466ead3",
       "credentials": {
         "telegramApi": {
-          "id": "0GZ3bMxpSTNMupMZ",
+          "id": "3YDK4VJPZ4b2u8PL",
           "name": "Telegram account"
         }
       }
@@ -292,6 +297,7 @@
   },
   "pinData": {},
   "meta": {
-    "instanceId": "6b9abc2a99c69957c091b96c25d48690c3bbd89cffa33ca8d5bfc1f6b14755b1"
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a7f6df443063e1201816e09e7012f9b750d9d0e2a55c255ef1db35efa96f79ff"
   }
 }

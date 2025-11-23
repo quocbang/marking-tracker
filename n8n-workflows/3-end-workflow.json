@@ -7,13 +7,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "9eb804ed-15a6-4cbd-a5f2-c842a026dbb8",
+      "id": "9ade6c61-4a19-4132-a819-ace425efaf1d",
       "name": "Webhook End",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
       "position": [
-        -1216,
-        112
+        -1904,
+        -48
       ],
       "webhookId": "end-session"
     },
@@ -73,55 +73,14 @@
         },
         "options": {}
       },
-      "id": "f42fa19f-1cfd-4e5f-a668-4e98907335b8",
+      "id": "b491985b-5049-40b6-9ceb-da997d74f714",
       "name": "Extract End Data",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -896,
-        112
+        -1584,
+        -48
       ]
-    },
-    {
-      "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M",
-          "mode": "list",
-          "cachedResultName": "Tracking Sessions",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "gid=0",
-          "mode": "list",
-          "cachedResultName": "Sessions",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit#gid=0"
-        },
-        "filtersUI": {
-          "values": [
-            {
-              "lookupColumn": "sessionId",
-              "lookupValue": "={{ $json.sessionId }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "95272bde-410f-4865-a5aa-7b4a20910c57",
-      "name": "Lookup Session",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
-      "position": [
-        -1008,
-        560
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "umrAZGShoRxgB742",
-          "name": "bangquoc9-sheet"
-        }
-      }
     },
     {
       "parameters": {
@@ -157,13 +116,13 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "4b8a3df1-872e-4a42-8ade-1c6ba70374be",
+      "id": "c6dab577-b74b-405d-ace1-78694b9bbaf3",
       "name": "Check Session Valid",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        32,
-        112
+        -448,
+        -48
       ]
     },
     {
@@ -171,267 +130,18 @@
         "language": "python",
         "pythonCode": "def to_int(value, default=0):\n    try:\n        return int(value)\n    except (TypeError, ValueError):\n        return default\n\ndef calculate_final_activity(item):\n    endTimeMs = to_int(item.get('endTimeMs'))\n    lastHeartbeatMs = to_int(item.get('lastHeartbeatMs'))\n    accumulatedActiveMs = to_int(item.get('accumulatedActiveMs'))\n    startTimeMs = to_int(item.get('startTimeMs'))\n\n    # Calculate final delta (time between last heartbeat and end)\n    finalDeltaMs = endTimeMs - lastHeartbeatMs if endTimeMs and lastHeartbeatMs else 0\n\n    # If final delta is small (< 30 seconds), add it to accumulated time\n    finalAccumulatedActiveMs = accumulatedActiveMs\n    if 0 < finalDeltaMs < 30000:\n        finalAccumulatedActiveMs += finalDeltaMs\n\n    # Convert to seconds\n    activeSec = round(finalAccumulatedActiveMs / 1000)\n\n    # Sanity checks\n    maxDurationSec = 43200  # 12 hours\n    finalActiveSec = min(activeSec, maxDurationSec)\n\n    # Calculate total elapsed time\n    totalElapsedSec = round((endTimeMs - startTimeMs) / 1000) if endTimeMs and startTimeMs else 0\n\n    # Calculate activity percentage\n    activityPercentage = round((finalActiveSec / totalElapsedSec) * 100) if totalElapsedSec > 0 else 0\n\n    # Calculate active minutes (rounded to 1 decimal)\n    activeMinutes = round(finalActiveSec / 60 * 10) / 10\n\n    # Return updated dict\n    return {\n        **item,\n        'finalDeltaMs': finalDeltaMs,\n        'finalAccumulatedActiveMs': finalAccumulatedActiveMs,\n        'activeSec': finalActiveSec,\n        'totalElapsedSec': totalElapsedSec,\n        'activityPercentage': activityPercentage,\n        'activeMinutes': activeMinutes\n    }\n\n# Apply for all items\noutput = []\nfor item in _input.all():\n    output.append(calculate_final_activity(item.json))\n\nreturn output\n"
       },
-      "id": "8cb20881-776a-4621-97c0-ab6023f14cd0",
+      "id": "94616a64-fd84-4af2-8bdf-30944a1db617",
       "name": "Calculate Final Duration",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        224,
-        0
+        -256,
+        -160
       ]
     },
     {
       "parameters": {
-        "operation": "update",
-        "documentId": {
-          "__rl": true,
-          "value": "1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M",
-          "mode": "list",
-          "cachedResultName": "Tracking Sessions",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "gid=0",
-          "mode": "list",
-          "cachedResultName": "Sessions",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sGSFYOdX13Ja7VdJyd45cGNYVvBL24NgDEPNoLc6n5M/edit#gid=0"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "endTime": "={{ $json.endTime }}",
-            "sessionId": "={{ $json.sessionId }}",
-            "used": "TRUE",
-            "endTimeMs": "={{ $json.endTimeMs }}",
-            "reason": "={{ $json.reason }}",
-            "activeSec": "={{ $json.activeSec }}",
-            "activeMinutes": "={{ $json.activeMinutes }}",
-            "totalElapsedSec": "={{ $json.totalElapsedSec }}",
-            "activityPercentage": "={{ $json.activityPercentage }}",
-            "finalAccumulatedActiveMs": "={{ $json.finalAccumulatedActiveMs }}",
-            "accumulatedActiveMs": "={{ $json.accumulatedActiveMs }}",
-            "name": "={{ $json.name }}",
-            "docUrl": "={{ $json.docUrl }}",
-            "startTime": "={{ $json.startTime }}"
-          },
-          "matchingColumns": [
-            "sessionId"
-          ],
-          "schema": [
-            {
-              "id": "sessionId",
-              "displayName": "sessionId",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "name",
-              "displayName": "name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "docUrl",
-              "displayName": "docUrl",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "startTime",
-              "displayName": "startTime",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "startTimeMs",
-              "displayName": "startTimeMs",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "lastHeartbeat",
-              "displayName": "lastHeartbeat",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "lastHeartbeatMs",
-              "displayName": "lastHeartbeatMs",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "accumulatedActiveMs",
-              "displayName": "accumulatedActiveMs",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "used",
-              "displayName": "used",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "ttlAt",
-              "displayName": "ttlAt",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "endTime",
-              "displayName": "endTime",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "endTimeMs",
-              "displayName": "endTimeMs",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "reason",
-              "displayName": "reason",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "activeSec",
-              "displayName": "activeSec",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "activeMinutes",
-              "displayName": "activeMinutes",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "totalElapsedSec",
-              "displayName": "totalElapsedSec",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "activityPercentage",
-              "displayName": "activityPercentage",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "finalAccumulatedActiveMs",
-              "displayName": "finalAccumulatedActiveMs",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "row_number",
-              "displayName": "row_number",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "readOnly": true,
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "id": "9b59ae8f-1d86-46eb-b0d7-62454fd6fe36",
-      "name": "Mark Session Used",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
-      "position": [
-        432,
-        -336
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "umrAZGShoRxgB742",
-          "name": "bangquoc9-sheet"
-        }
-      }
-    },
-    {
-      "parameters": {
+        "authentication": "serviceAccount",
         "operation": "append",
         "documentId": {
           "__rl": true,
@@ -581,18 +291,18 @@
         },
         "options": {}
       },
-      "id": "75478f85-9645-4b87-b739-1c7d2620b05b",
+      "id": "44bf3ea0-effe-4ad0-a02a-fedf2d241527",
       "name": "Append to Completed Sheet",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        672,
-        0
+        192,
+        -160
       ],
       "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "umrAZGShoRxgB742",
-          "name": "bangquoc9-sheet"
+        "googleApi": {
+          "id": "krOtZJvb7bpYplAz",
+          "name": "n8n-3-814@modular-rex-435916-t9.iam.gserviceaccount.com"
         }
       }
     },
@@ -619,13 +329,13 @@
           }
         }
       },
-      "id": "35ad7216-0b64-4eea-bd72-480b6b4cde19",
+      "id": "f15f0a67-c0e1-4b76-aefd-5a99fd1d85e0",
       "name": "Respond End OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1904,
-        576
+        1424,
+        416
       ]
     },
     {
@@ -643,13 +353,13 @@
           }
         }
       },
-      "id": "488dd60e-732b-44c5-88f3-6dcec5993496",
+      "id": "99b3e08b-31dd-4c64-bc24-cc4272b1cd14",
       "name": "Respond Not Found",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        224,
-        208
+        -256,
+        48
       ]
     },
     {
@@ -661,10 +371,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.1,
       "position": [
-        -256,
-        128
+        -736,
+        -32
       ],
-      "id": "e0186839-74d2-4397-9553-53a1926f5af7",
+      "id": "cb35dd3e-a22f-40f0-a14d-d97e9be46d28",
       "name": "Merge"
     },
     {
@@ -677,10 +387,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -464,
-        272
+        -944,
+        112
       ],
-      "id": "c3b89726-5a0c-492b-a15d-93a0028ec806",
+      "id": "52917e40-5900-4572-9642-dd5146dd9d12",
       "name": "except fields"
     },
     {
@@ -688,10 +398,10 @@
         "operation": "get",
         "dataTableId": {
           "__rl": true,
-          "value": "jCLJwqOBit1WTfTW",
+          "value": "grTeMTL8yObKWZOo",
           "mode": "list",
-          "cachedResultName": "tracker_log_sessions",
-          "cachedResultUrl": "/projects/APIuaChzR7jtvCPU/datatables/jCLJwqOBit1WTfTW"
+          "cachedResultName": "tracking_log_sesions",
+          "cachedResultUrl": "/projects/LNLBzzDc8DO3STen/datatables/grTeMTL8yObKWZOo"
         },
         "filters": {
           "conditions": [
@@ -705,10 +415,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        -688,
-        272
+        -1168,
+        112
       ],
-      "id": "1a5c434e-600d-48f0-8e5d-b85a258ee8f9",
+      "id": "875be8b9-0773-427e-9229-46a474c8efbf",
       "name": "Get row(s)"
     },
     {
@@ -716,10 +426,10 @@
         "operation": "update",
         "dataTableId": {
           "__rl": true,
-          "value": "jCLJwqOBit1WTfTW",
+          "value": "grTeMTL8yObKWZOo",
           "mode": "list",
-          "cachedResultName": "tracker_log_sessions",
-          "cachedResultUrl": "/projects/APIuaChzR7jtvCPU/datatables/jCLJwqOBit1WTfTW"
+          "cachedResultName": "tracking_log_sesions",
+          "cachedResultUrl": "/projects/LNLBzzDc8DO3STen/datatables/grTeMTL8yObKWZOo"
         },
         "filters": {
           "conditions": [
@@ -940,56 +650,79 @@
           ],
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
-        }
+        },
+        "options": {}
       },
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        432,
-        0
+        -48,
+        -160
       ],
-      "id": "f8939fef-0224-44a8-b28c-fce7aaa0ee20",
+      "id": "25e2b5c5-7a49-4aba-8168-1b5bff045cf3",
       "name": "Update row(s)"
     },
     {
       "parameters": {
+        "authentication": "serviceAccount",
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU",
+          "value": "1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM",
           "mode": "list",
-          "cachedResultName": "Chấm Điểm",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit?usp=drivesdk"
+          "cachedResultName": "Check bài viết ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": "gid=0",
+          "value": 1383647999,
           "mode": "list",
-          "cachedResultName": "grading",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit#gid=0"
+          "cachedResultName": "Full",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit#gid=1383647999"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
             "Link": "={{ $('Extract End Data').item.json.fullUrl }}",
-            "Trạng Thái": "Đã chữa"
+            "Type ": "Đã chữa"
           },
           "matchingColumns": [
             "Link"
           ],
           "schema": [
             {
-              "id": "Trạng Thái",
-              "displayName": "Trạng Thái",
+              "id": "Dấu thời gian",
+              "displayName": "Dấu thời gian",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": true
             },
             {
-              "id": "Nguyên Nhân",
-              "displayName": "Nguyên Nhân",
+              "id": "Các bạn chọn lớp không đúng theo danh sách đăng ký sẽ không được chữa.\nThời gian trả bài chữa ( 7 - 9 ngày sau dl nộp)",
+              "displayName": "Các bạn chọn lớp không đúng theo danh sách đăng ký sẽ không được chữa.\nThời gian trả bài chữa ( 7 - 9 ngày sau dl nộp)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Họ và tên",
+              "displayName": "Họ và tên",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Số điện thoại ",
+              "displayName": "Số điện thoại ",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -1008,6 +741,26 @@
               "removed": true
             },
             {
+              "id": "Type ",
+              "displayName": "Type ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Error ",
+              "displayName": "Error ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
               "id": "Link",
               "displayName": "Link",
               "required": false,
@@ -1016,6 +769,46 @@
               "type": "string",
               "canBeUsedToMatch": true,
               "removed": false
+            },
+            {
+              "id": "Lời nhắn ",
+              "displayName": "Lời nhắn ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Lời nhắn\nVí dụ: Nộp muộn đã có xin phép, học lịch cọc cạch,...\nLưu ý: Tất cả những câu hỏi liên quan đến việc nộp bài, chữa bài, nội dung học,...hãy nhắn tin qua page để được trả lời",
+              "displayName": "Lời nhắn\nVí dụ: Nộp muộn đã có xin phép, học lịch cọc cạch,...\nLưu ý: Tất cả những câu hỏi liên quan đến việc nộp bài, chữa bài, nội dung học,...hãy nhắn tin qua page để được trả lời",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Địa chỉ email",
+              "displayName": "Địa chỉ email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Sheet URL",
+              "displayName": "Sheet URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
             },
             {
               "id": "row_number",
@@ -1034,41 +827,42 @@
         },
         "options": {}
       },
-      "id": "77b661da-a6cc-44af-ae0f-095351fae847",
+      "id": "ecb71bb7-9616-4530-a6b6-4089fdea5181",
       "name": "Update Status to Completed",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        432,
-        208
+        -48,
+        48
       ],
       "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "umrAZGShoRxgB742",
-          "name": "bangquoc9-sheet"
+        "googleApi": {
+          "id": "krOtZJvb7bpYplAz",
+          "name": "n8n-3-814@modular-rex-435916-t9.iam.gserviceaccount.com"
         }
       }
     },
     {
       "parameters": {
+        "authentication": "serviceAccount",
         "documentId": {
           "__rl": true,
-          "value": "1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU",
+          "value": "1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM",
           "mode": "list",
-          "cachedResultName": "Chấm Điểm",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit?usp=drivesdk"
+          "cachedResultName": "Check bài viết ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": "gid=0",
+          "value": 1383647999,
           "mode": "list",
-          "cachedResultName": "grading",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit#gid=0"
+          "cachedResultName": "Full",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit#gid=1383647999"
         },
         "filtersUI": {
           "values": [
             {
-              "lookupColumn": "Trạng Thái"
+              "lookupColumn": "Type "
             },
             {
               "lookupColumn": "Tên",
@@ -1081,16 +875,16 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        -688,
-        576
+        -816,
+        416
       ],
-      "id": "6ad1a1a7-e3b5-4832-a6e0-752d106f4ae0",
+      "id": "3b966d0d-d983-441d-ba8e-8b06b79d315a",
       "name": "Get row(s) in sheet",
       "alwaysOutputData": true,
       "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "umrAZGShoRxgB742",
-          "name": "bangquoc9-sheet"
+        "googleApi": {
+          "id": "M0c8RWyLvkcDkvoq",
+          "name": "n8n-2-970@modular-rex-435916-t9.iam.gserviceaccount.com"
         }
       }
     },
@@ -1103,27 +897,28 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1488,
-        576
+        1008,
+        416
       ],
-      "id": "34628280-eaea-438f-a074-60c6a15021a5",
+      "id": "c508bdae-5b8c-4b1a-b380-a588c577a32b",
       "name": "Merge1"
     },
     {
       "parameters": {
+        "authentication": "serviceAccount",
         "documentId": {
           "__rl": true,
-          "value": "1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU",
+          "value": "1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM",
           "mode": "list",
-          "cachedResultName": "Chấm Điểm",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit?usp=drivesdk"
+          "cachedResultName": "Check bài viết ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "value": "gid=0",
+          "value": 1383647999,
           "mode": "list",
-          "cachedResultName": "grading",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yLky_4vnRcelT49FLvXdkMPryQH_EJVRXMuP0_XNeYU/edit#gid=0"
+          "cachedResultName": "Full",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit#gid=1383647999"
         },
         "filtersUI": {
           "values": [
@@ -1138,22 +933,22 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        640,
-        208
+        160,
+        48
       ],
-      "id": "18dd8952-51b2-48f8-9508-c4b8d32f3e4a",
+      "id": "538db4e1-6143-4a61-a306-ce935f07a6b5",
       "name": "Get row(s) in sheet1",
       "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "umrAZGShoRxgB742",
-          "name": "bangquoc9-sheet"
+        "googleApi": {
+          "id": "M0c8RWyLvkcDkvoq",
+          "name": "n8n-2-970@modular-rex-435916-t9.iam.gserviceaccount.com"
         }
       }
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "http://localhost:5678/webhook/send-email",
+        "url": "https://n8n.dungenglishspeaking.com/webhook/send-email",
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
@@ -1188,10 +983,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        848,
-        208
+        368,
+        48
       ],
-      "id": "6602e401-d8f7-4c64-9948-eaeaaa388e97",
+      "id": "739e6fc5-04d0-4e42-86e6-13d7afabcef3",
       "name": "send email async"
     },
     {
@@ -1203,11 +998,90 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1168,
-        128
+        688,
+        -32
       ],
-      "id": "8ae5a26b-bb9a-4f0c-97e5-8f71a9abc030",
+      "id": "28088bcb-335f-4040-8987-8bf29b1f8957",
       "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "258d8287-02b6-4705-b449-2d380221fadf",
+              "leftValue": "={{ $json.type }}",
+              "rightValue": "writing",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1376,
+        432
+      ],
+      "id": "95d21a46-9da1-46d6-a02c-da533016eb3e",
+      "name": "is writing"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM",
+          "mode": "list",
+          "cachedResultName": "Check bài viết ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1383647999,
+          "mode": "list",
+          "cachedResultName": "Full",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IzFQRVfUTX0vctuumWF16vIJver7dimlfsj9DgXYoMM/edit#gid=1383647999"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Type "
+            },
+            {
+              "lookupColumn": "Tên",
+              "lookupValue": "={{ $json.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -816,
+        704
+      ],
+      "id": "7dd546be-e01d-468d-853b-346558e6cdd3",
+      "name": "for speaking",
+      "credentials": {
+        "googleApi": {
+          "id": "lZEwATI4LCE6jNXJ",
+          "name": "n8n-1-557@modular-rex-435916-t9.iam.gserviceaccount.com"
+        }
+      }
     }
   ],
   "connections": {
@@ -1236,16 +1110,11 @@
             "index": 0
           },
           {
-            "node": "Get row(s) in sheet",
+            "node": "is writing",
             "type": "main",
             "index": 0
           }
         ]
-      ]
-    },
-    "Lookup Session": {
-      "main": [
-        []
       ]
     },
     "Check Session Valid": {
@@ -1280,11 +1149,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Mark Session Used": {
-      "main": [
-        []
       ]
     },
     "Append to Completed Sheet": {
@@ -1407,11 +1271,40 @@
           }
         ]
       ]
+    },
+    "is writing": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "for speaking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "for speaking": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
     }
   },
   "pinData": {},
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "6b9abc2a99c69957c091b96c25d48690c3bbd89cffa33ca8d5bfc1f6b14755b1"
+    "instanceId": "a7f6df443063e1201816e09e7012f9b750d9d0e2a55c255ef1db35efa96f79ff"
   }
 }

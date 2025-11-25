@@ -536,9 +536,11 @@
   const params = new URLSearchParams(window.location.search);
   const name = params.get('name') || 'unknown';  
   const doc_id= params.get('doc_id')
+  const speaking_doc_id = params.get('speaking_doc_id');
   docUrl = `https://docs.google.com/document/d/${doc_id}`;
-  const type = docUrl ? 'doc' : speaking ? 'speaking' : null;
-  if(!docUrl && !speaking) { document.body.innerHTML = '<h3>Missing ?doc= or ?speaking= param</h3>'; return; }
+  speaking = `https://docs.google.com/document/d/${speaking_doc_id}`;
+  const type = docUrl ? 'doc' : speaking_doc_id ? 'speaking' : null;
+  if(!doc_id && !speaking_doc_id) { document.body.innerHTML = '<h3>Missing ?doc_id= or ?speaking_doc_id= param</h3>'; return; }
 
   const BACKEND = 'https://n8n.srv1145234.hstgr.cloud/webhook/marking-log';
   const START_URL = BACKEND + '/start';
@@ -547,9 +549,9 @@
   const ERRORS_URL = BACKEND + '/errors';
 
   const iframe = document.getElementById('docFrame');  
-  if (docUrl) {
+  if (doc_id) {
     iframe.src = docUrl;
-  } else if (speaking) {
+  } else if (speaking_doc_id) {
     iframe.src = speaking;
   }
 
@@ -610,11 +612,12 @@
 
   // helper: get full URL with doc parameter
   function getFullUrl() {
-    const url = new URL(window.location.href);
-    if (docUrl) {
-      url.searchParams.set('doc', docUrl);
-    }
-    return url.toString();
+    // const url = new URL(window.location.href);
+    // if (docUrl) {
+    //   url.searchParams.set('doc', docUrl);
+    // }
+    const fullURL = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}&doc_id=${encodeURIComponent(doc_id)}${speaking_doc_id ? `&speaking_doc_id=${encodeURIComponent(speaking_doc_id)}` : ''}`;
+    return fullURL;
   }
 
   // create new session if none or expired

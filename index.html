@@ -562,7 +562,6 @@
       <div class="modal-header">Xác nhận</div>
       <div class="modal-body">
         <p style="margin: 0; color: #333; font-size: 14px; line-height: 1.5;">Bạn có chắc chắn muốn hoàn thành phiên chấm điểm này không?</p>
-        <div id="loadingSpinner" class="loading-spinner" style="display: none;"></div>
       </div>
       <div class="modal-footer">
         <button class="modal-button btn-cancel" id="confirmCancelBtn">Hủy</button>
@@ -1000,9 +999,6 @@
   completeBtn.addEventListener('click', async () => {
     const confirmed = await showConfirmModal();
     if (confirmed) {
-      // Show loading spinner
-      loadingSpinner.style.display = 'inline-block';
-      
       // Disable button to prevent double-click
       const completeBtn = document.getElementById('completeBtn');
       completeBtn.disabled = true;
@@ -1026,9 +1022,6 @@
           
           console.log('Calling /end API:', payload);
           const res = await postJson(END_URL, payload);
-          
-          // Hide loading spinner
-          loadingSpinner.style.display = 'none';
           
           if (res.ok) {
             console.log('Session ended successfully');
@@ -1069,9 +1062,6 @@
             isIntentionalExit = false;
           }
         } else {
-          // Hide loading spinner
-          loadingSpinner.style.display = 'none';
-          
           confirmModal.classList.remove('active');
           showResultModal('Không tìm thấy session để kết thúc.');
           completeBtn.disabled = false;
@@ -1079,9 +1069,6 @@
         }
       } catch (e) {
         console.error('Error completing session:', e);
-        // Hide loading spinner
-        loadingSpinner.style.display = 'none';
-        
         confirmModal.classList.remove('active');
         showResultModal('Có lỗi xảy ra. Vui lòng thử lại.');
         completeBtn.disabled = false;
@@ -1284,7 +1271,6 @@
   const confirmModal = document.getElementById('confirmModal');
   const confirmCancelBtn = document.getElementById('confirmCancelBtn');
   const confirmOkBtn = document.getElementById('confirmOkBtn');
-  const loadingSpinner = document.getElementById('loadingSpinner');
 
   // Function to show confirmation modal and return promise
   function showConfirmModal() {
@@ -1292,6 +1278,11 @@
       confirmModal.classList.add('active');
       
       const handleConfirm = () => {
+        // Disable buttons and show loading
+        confirmOkBtn.disabled = true;
+        confirmOkBtn.textContent = 'Đang xử lý...';
+        confirmCancelBtn.disabled = true;
+        
         cleanup();
         resolve(true);
       };

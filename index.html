@@ -537,6 +537,7 @@
   const name = params.get('name') || 'unknown';  
   const doc_id= params.get('doc_id')
   const speaking_doc_id = params.get('speaking_doc_id');
+  const from = params.get('from');
   let docUrl = null;
   let speaking = null;
   if (doc_id) {
@@ -622,7 +623,16 @@
     // if (docUrl) {
     //   url.searchParams.set('doc', docUrl);
     // }
-    const fullURL = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}&doc_id=${encodeURIComponent(doc_id)}${speaking_doc_id ? `&speaking_doc_id=${encodeURIComponent(speaking_doc_id)}` : ''}`;
+    let fullURL = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}`;
+    if (doc_id) {
+      fullURL += `&doc_id=${encodeURIComponent(doc_id)}`;
+    }
+    if (speaking_doc_id) {
+      fullURL += `&speaking_doc_id=${encodeURIComponent(speaking_doc_id)}`;
+    }
+    if (from) {
+      fullURL += `&from=${encodeURIComponent(from)}`;
+    }
     return fullURL;
   }
 
@@ -860,7 +870,8 @@
       ts: new Date().toISOString(),
       fullUrl: getFullUrl(),
       name: name,
-      type: type
+      type: type,
+      from: from
     };
     
     // navigator.sendBeacon to increase chance of delivery on unload
@@ -965,7 +976,8 @@
             ts: new Date().toISOString(),
             fullUrl: getFullUrl(),
             name: name,
-            type: type
+            type: type,
+            from: from
           };
           
           console.log('Calling /end API:', payload);
@@ -1149,7 +1161,8 @@
         errorType: selectedType,
         errorTypeLabel: errorTypeLabels[selectedType] || selectedType,
         errorDescription: description || null,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        from: from
       };
 
       // Save to localStorage

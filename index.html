@@ -537,8 +537,14 @@
   const name = params.get('name') || 'unknown';  
   const doc_id= params.get('doc_id')
   const speaking_doc_id = params.get('speaking_doc_id');
-  docUrl = `https://docs.google.com/document/d/${doc_id}`;
-  speaking = `https://docs.google.com/document/d/${speaking_doc_id}`;
+  let docUrl = null;
+  let speaking = null;
+  if (doc_id) {
+    docUrl = `https://docs.google.com/document/d/${doc_id}`;
+  }
+  if (speaking_doc_id) {
+    speaking = `https://docs.google.com/document/d/${speaking_doc_id}`;
+  }
   const type = docUrl ? 'doc' : speaking_doc_id ? 'speaking' : null;
   if(!doc_id && !speaking_doc_id) { document.body.innerHTML = '<h3>Missing ?doc_id= or ?speaking_doc_id= param</h3>'; return; }
 
@@ -710,8 +716,18 @@
     try {
       console.log('Fetching content from Google Docs API:', url);
 
+      // Extract doc ID from URL
+      const urlObj = new URL(url);
+      const pathParts = urlObj.pathname.split('/');
+      const dIndex = pathParts.indexOf('d');
+      const docId = dIndex >= 0 && pathParts[dIndex + 1] ? pathParts[dIndex + 1] : null;
+
+      if (!docId) {
+        throw new Error('Invalid Google Docs URL');
+      }
+
       // Use the dedicated API endpoint for fetching doc content
-      const apiUrl = `${BACKEND}/fetch-doc-content?doc_id=${encodeURIComponent(doc_id)}`;
+      const apiUrl = `${BACKEND}/fetch-doc-content?doc_id=${encodeURIComponent(docId)}`;
 
       const response = await fetch(apiUrl);
       if (!response.ok) {
@@ -733,6 +749,31 @@
     }
   }
 
+  // Function to parse speaking content and create audio players
+  function parseSpeakingContent(content) {
+    const lines = content.split('\n').filter(line => line.trim());
+    let html = '';
+
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('Bài ')) {
+        html += `<h3 style="margin: 10px 0; color: #333; font-size: 16px;">${trimmed}</h3>`;
+      } else if (trimmed.includes('drive.google.com')) {
+        const match = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (match) {
+          const fileId = match[1];
+          html += `<div style="margin: 15px 0; padding: 12px; background: #f9f9f9; border-radius: 10px; box-shadow: 0 3px 6px rgba(0,0,0,0.1);"><iframe src="https://drive.google.com/file/d/${fileId}/preview" width="100%" height="80" frameborder="0" allowfullscreen style="border-radius: 8px;"></iframe></div>`;
+        } else {
+          html += `<p style="margin: 5px 0; color: #666;">${trimmed}</p>`;
+        }
+      } else {
+        html += `<p style="margin: 5px 0; color: #666;">${trimmed}</p>`;
+      }
+    });
+
+    return html;
+  }
+
   // Function to display content - try Google Docs first, then API fallback
   async function displayContent() {
     const contentBody = document.getElementById('contentBody');
@@ -743,9 +784,11 @@
 
       let content = null;
 
-      // Try fetching from Google Docs first (only for writing mode)
+      // Try fetching from Google Docs first (for both writing and speaking)
       if (docUrl) {
         content = await fetchGoogleDocsContent(docUrl);
+      } else if (speaking) {
+        content = await fetchGoogleDocsContent(speaking);
       }
 
       // If Google Docs fetch failed or not available, use API content
@@ -756,7 +799,11 @@
 
       // Display content or show error
       if (content) {
-        contentBody.innerHTML = `<textarea id="contentTextarea" style="width: 100%; height: 100%; border: none; outline: none; resize: none; padding: 0; margin: 0; background: transparent; font-family: inherit; font-size: inherit; line-height: inherit; color: inherit; white-space: pre-wrap;">${content}</textarea>`;
+        if (type === 'speaking') {
+          contentBody.innerHTML = parseSpeakingContent(content);
+        } else {
+          contentBody.innerHTML = `<textarea id="contentTextarea" style="width: 100%; height: 100%; border: none; outline: none; resize: none; padding: 0; margin: 0; background: transparent; font-family: inherit; font-size: inherit; line-height: inherit; color: inherit; white-space: pre-wrap;">${content}</textarea>`;
+        }
         console.log('Content displayed successfully');
       } else {
         contentBody.innerHTML = '<div class="content-placeholder">Không thể tải nội dung bài tập</div>';

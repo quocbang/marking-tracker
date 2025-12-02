@@ -33,6 +33,28 @@
       font-weight: 600;
       color: #333;
       flex-shrink: 0;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .content-header:hover {
+      background: #f5f5f5;
+    }
+
+    .content-header-clickable {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .content-header-icon {
+      font-size: 18px;
+      opacity: 0.6;
+      transition: opacity 0.2s ease;
+    }
+
+    .content-header:hover .content-header-icon {
+      opacity: 1;
     }
 
     .content-body {
@@ -475,7 +497,12 @@
   <div class="app-container">
     <!-- Left Panel - Content Display -->
     <div class="content-panel">
-      <div class="content-header">Nội dung bài tập</div>
+      <div class="content-header" id="contentHeader">
+        <div class="content-header-clickable">
+          <span>Nội dung bài tập</span>
+          <span class="content-header-icon" id="headerIcon" style="display: none;">🔗</span>
+        </div>
+      </div>
       <div class="content-body" id="contentBody">
         <div class="content-placeholder">Đang tải nội dung...</div>
       </div>
@@ -867,6 +894,31 @@
 
   // Display original content - try Google Docs first, then fallback to API
   displayContent();
+
+  // Add click handler to content header for writing mode
+  const contentHeader = document.getElementById('contentHeader');
+  const headerIcon = document.getElementById('headerIcon');
+  
+  if (docUrl) {
+    // Show icon for writing mode
+    headerIcon.style.display = 'block';
+    
+    // Add click handler to open Google Docs in popup
+    contentHeader.addEventListener('click', () => {
+      const width = 1000;
+      const height = 800;
+      const left = (screen.width - width) / 2;
+      const top = (screen.height - height) / 2;
+      
+      window.open(
+        docUrl,
+        'GoogleDocsPopup',
+        `width=${width},height=${height},left=${left},top=${top},toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`
+      );
+    });
+    
+    contentHeader.title = 'Click để mở Google Doc trong cửa sổ mới';
+  }
 
   async function sendHeartbeat() {
     if (!session) return;

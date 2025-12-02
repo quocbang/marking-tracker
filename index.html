@@ -588,7 +588,7 @@
   const type = docUrl ? 'doc' : speaking_doc_id ? 'speaking' : null;
   if(!doc_id && !speaking_doc_id) { document.body.innerHTML = '<h3>Missing ?doc_id= or ?speaking_doc_id= param</h3>'; return; }
 
-  const BACKEND = 'https://n8n.srv1145234.hstgr.cloud/webhook/marking-log';
+  const BACKEND = 'https://n8n.dungenglishspeaking.com//webhook/marking-log';
   const START_URL = BACKEND + '/start';
   const HB_URL = BACKEND + '/heartbeat';
   const END_URL = BACKEND + '/end';

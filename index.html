@@ -903,18 +903,10 @@
     // Show icon for writing mode
     headerIcon.style.display = 'block';
     
-    // Add click handler to open Google Docs in popup
+    // Add click handler to open Google Docs in new tab
     contentHeader.addEventListener('click', () => {
-      const width = 1000;
-      const height = 800;
-      const left = (screen.width - width) / 2;
-      const top = (screen.height - height) / 2;
-      
-      window.open(
-        docUrl,
-        'GoogleDocsPopup',
-        `width=${width},height=${height},left=${left},top=${top},toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`
-      );
+      // open in new tab
+      window.open(docUrl, '_blank');
     });
     
     contentHeader.title = 'Click để mở Google Doc trong cửa sổ mới';
@@ -925,7 +917,8 @@
     const body = { sessionId: session.sessionId, ts: new Date().toISOString() };
     // include 'active' flag if user has recent activity (<45s)
     // Increased from 10s to 45s to account for reading/thinking time
-    body.active = (Date.now() - lastActivityTs) < 45000;
+    // body.active = (Date.now() - lastActivityTs) < 45000; // Commented out: always send active=true
+    body.active = true;
     
     // Send heartbeat and handle SESSION_NOT_FOUND error
     const res = await postJson(HB_URL, body);

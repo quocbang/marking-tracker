@@ -604,6 +604,9 @@
   const doc_id= params.get('doc_id')
   const speaking_doc_id = params.get('speaking_doc_id');
   const from = params.get('from');
+  // Identifies the Full-sheet row this link came from; /end matches on the exact link, and
+  // two rows can grade the same Doc, so without it only one of them would be marked done.
+  const row_id = params.get('row_id');
   let docUrl = null;
   let speaking = null;
   if (doc_id) {
@@ -692,6 +695,10 @@
     let fullURL = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(name)}`;
     if (doc_id) {
       fullURL += `&doc_id=${encodeURIComponent(doc_id)}`;
+    }
+    // Must follow doc_id: the sheet link is name, doc_id, row_id, and /end matches it verbatim.
+    if (row_id) {
+      fullURL += `&row_id=${encodeURIComponent(row_id)}`;
     }
     if (speaking_doc_id) {
       fullURL += `&speaking_doc_id=${encodeURIComponent(speaking_doc_id)}`;
